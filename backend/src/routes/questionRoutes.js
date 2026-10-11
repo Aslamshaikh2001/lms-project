@@ -9,6 +9,7 @@ import {
   publishQuestion,
   unpublishQuestion,
   getQuestionsByAssessment,
+   bulkImportQuestions, // NEW
 } from "../controllers/questionController.js";
 
 import {
@@ -50,6 +51,15 @@ router.post(
   createQuestion
 );
 
+// ======================================================
+// BULK IMPORT QUESTIONS
+// POST /api/questions/bulk-import
+// ======================================================
+
+router.post(
+  "/bulk-import",
+  bulkImportQuestions
+);
 
 // ======================================================
 // GET ALL

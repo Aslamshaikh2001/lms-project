@@ -1986,7 +1986,7 @@ export default function AppRoutes() {
           navigate to a result/review page.
           -------------------------------------------------- */}
 
-      <Route
+      {/* <Route
         path="/student/attempts/:attemptId"
         element={
           <ProtectedRoute>
@@ -1996,7 +1996,6 @@ export default function AppRoutes() {
                 "STUDENT",
               ]}
             >
-
               <StudentLayout>
 
                 <StudentAttempt />
@@ -2007,7 +2006,21 @@ export default function AppRoutes() {
 
           </ProtectedRoute>
         }
-      />
+      /> */}
+
+
+      
+<Route
+  path="/student/attempts/:attemptId"
+  element={
+    <ProtectedRoute>
+      <RoleRoute allowedRoles={["STUDENT"]}>
+        <StudentAttempt />
+      </RoleRoute>
+    </ProtectedRoute>
+  }
+/>
+
 
 
       {/* ==================================================
@@ -2278,4 +2291,4 @@ export default function AppRoutes() {
 
     </Routes>
   );
-}
+} 

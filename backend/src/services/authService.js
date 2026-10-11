@@ -29,21 +29,75 @@
 
 
 // // ======================================================
+// // ROLE CONFIGURATION
+// // ======================================================
+// //
+// // These are the roles supported by the User model.
+// //
+// // IMPORTANT:
+// // Public registration controller should decide which
+// // roles are allowed for public registration.
+// //
+// // This service validates the role again so that even if
+// // this function is called from another place, an invalid
+// // role cannot be stored in MongoDB.
+// //
+
+// const ALLOWED_ROLES = [
+//   "SUPER_ADMIN",
+//   "ADMIN",
+//   "INSTRUCTOR",
+//   "STUDENT",
+// ];
+
+
+// // ======================================================
 // // REGISTER
 // // ======================================================
 
 // export async function registerUser({
 //   name,
 //   email,
+//   phone,
+//   address,
 //   password,
 //   role = "STUDENT",
 // }) {
-//   const normalizedEmail =
-//     email.toLowerCase().trim();
+//   // --------------------------------------------------
+//   // Normalize email
+//   // --------------------------------------------------
+
+//   const normalizedEmail = email
+//     .toLowerCase()
+//     .trim();
+
+
+//   // --------------------------------------------------
+//   // Normalize role
+//   // --------------------------------------------------
+
+//   const normalizedRole = String(role || "")
+//     .trim()
+//     .toUpperCase();
+
+
+//   // --------------------------------------------------
+//   // Validate role
+//   // --------------------------------------------------
+
+//   if (!ALLOWED_ROLES.includes(normalizedRole)) {
+//     throw new Error("Invalid user role.");
+//   }
+
+
+//   // --------------------------------------------------
+//   // Check existing user
+//   // --------------------------------------------------
 
 //   const existingUser = await User.findOne({
 //     email: normalizedEmail,
 //   });
+
 
 //   if (existingUser) {
 //     throw new Error(
@@ -51,23 +105,107 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Hash password
+//   // --------------------------------------------------
+
 //   const hashedPassword =
 //     await hashPassword(password);
 
-//   const user = await User.create({
-//     name,
+
+//   // --------------------------------------------------
+//   // Prepare user data
+//   // --------------------------------------------------
+
+//   const userData = {
+//     name: name?.trim(),
+
 //     email: normalizedEmail,
+
 //     password: hashedPassword,
-//     role,
-//   });
+
+//     role: normalizedRole,
+//   };
+
+
+//   // --------------------------------------------------
+//   // Phone
+//   // --------------------------------------------------
+
+//   if (phone !== undefined) {
+//     userData.phone =
+//       phone === null
+//         ? null
+//         : String(phone).trim();
+//   }
+
+
+//   // --------------------------------------------------
+//   // Address
+//   // --------------------------------------------------
+//   //
+//   // Supports:
+//   //
+//   // {
+//   //   street,
+//   //   city,
+//   //   state,
+//   //   country,
+//   //   postalCode
+//   // }
+//   //
+//   // If address is not provided, MongoDB model defaults
+//   // will be used.
+//   //
+
+//   if (address !== undefined) {
+//     userData.address = address;
+//   }
+
+
+//   // --------------------------------------------------
+//   // Create user
+//   // --------------------------------------------------
+
+//   const user = await User.create(
+//     userData
+//   );
+
+
+//   // --------------------------------------------------
+//   // Return safe user data
+//   // --------------------------------------------------
+//   //
+//   // Never return password.
+//   //
 
 //   return {
 //     id: user._id,
+
 //     name: user.name,
+
 //     email: user.email,
+
+//     phone: user.phone,
+
+//     address: user.address,
+
 //     role: user.role,
+
+//     profileImage: user.profileImage,
+
 //     isEmailVerified:
 //       user.isEmailVerified,
+
+//     isActive:
+//       user.isActive,
+
+//     isSuspended:
+//       user.isSuspended,
+
+//     createdAt:
+//       user.createdAt,
 //   };
 // }
 
@@ -82,12 +220,22 @@
 //   userAgent,
 //   ipAddress,
 // }) {
+//   // --------------------------------------------------
+//   // Normalize email
+//   // --------------------------------------------------
+
 //   const normalizedEmail =
 //     email.toLowerCase().trim();
+
+
+//   // --------------------------------------------------
+//   // Find user including password
+//   // --------------------------------------------------
 
 //   const user = await User.findOne({
 //     email: normalizedEmail,
 //   }).select("+password");
+
 
 //   if (!user) {
 //     throw new Error(
@@ -95,11 +243,28 @@
 //     );
 //   }
 
+
+//   if (!user.isEmailVerified) {
+//   throw new Error(
+//     "Please verify your email address before logging in."
+//   );
+// }
+
+
+//   // --------------------------------------------------
+//   // Check active status
+//   // --------------------------------------------------
+
 //   if (!user.isActive) {
 //     throw new Error(
 //       "Your account is inactive."
 //     );
 //   }
+
+
+//   // --------------------------------------------------
+//   // Check suspended status
+//   // --------------------------------------------------
 
 //   if (user.isSuspended) {
 //     throw new Error(
@@ -107,11 +272,17 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Compare password
+//   // --------------------------------------------------
+
 //   const passwordMatch =
 //     await comparePassword(
 //       password,
 //       user.password
 //     );
+
 
 //   if (!passwordMatch) {
 //     throw new Error(
@@ -119,51 +290,97 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Update last login
+//   // --------------------------------------------------
+
 //   user.lastLogin = new Date();
 
 //   await user.save();
 
-//   // Create refresh session first.
-//   const session = await RefreshSession.create({
-//     user: user._id,
-//     tokenHash: crypto
-//       .randomBytes(32)
-//       .toString("hex"),
 
-//     expiresAt: new Date(
-//       Date.now() +
-//         7 * 24 * 60 * 60 * 1000
-//     ),
+//   // --------------------------------------------------
+//   // Create refresh session first
+//   // --------------------------------------------------
 
-//     userAgent,
-//     ipAddress,
-//   });
+//   const session =
+//     await RefreshSession.create({
+//       user: user._id,
 
-//   // Generate actual refresh JWT.
+//       tokenHash: crypto
+//         .randomBytes(32)
+//         .toString("hex"),
+
+//       expiresAt: new Date(
+//         Date.now() +
+//           7 * 24 * 60 * 60 * 1000
+//       ),
+
+//       userAgent,
+
+//       ipAddress,
+//     });
+
+
+//   // --------------------------------------------------
+//   // Generate actual refresh JWT
+//   // --------------------------------------------------
+
 //   const refreshToken =
 //     generateRefreshToken({
 //       userId: user._id,
 //       sessionId: session._id,
 //     });
 
-//   // Store hash of actual JWT.
+
+//   // --------------------------------------------------
+//   // Store hash of actual JWT
+//   // --------------------------------------------------
+
 //   session.tokenHash =
 //     hashToken(refreshToken);
 
 //   await session.save();
 
+
+//   // --------------------------------------------------
+//   // Generate access token
+//   // --------------------------------------------------
+
 //   const accessToken =
 //     generateAccessToken(user);
+
+
+//   // --------------------------------------------------
+//   // Return login response
+//   // --------------------------------------------------
 
 //   return {
 //     user: {
 //       id: user._id,
+
 //       name: user.name,
+
 //       email: user.email,
+
+//       phone: user.phone,
+
+//       address: user.address,
+
 //       role: user.role,
+
+//       profileImage:
+//         user.profileImage,
+
 //       isEmailVerified:
 //         user.isEmailVerified,
-//       isActive: user.isActive,
+
+//       isActive:
+//         user.isActive,
+
+//       isSuspended:
+//         user.isSuspended,
 //     },
 
 //     accessToken,
@@ -182,11 +399,20 @@
 //   userAgent,
 //   ipAddress
 // ) {
+//   // --------------------------------------------------
+//   // Check refresh token
+//   // --------------------------------------------------
+
 //   if (!refreshToken) {
 //     throw new Error(
 //       "Refresh token is required."
 //     );
 //   }
+
+
+//   // --------------------------------------------------
+//   // Verify JWT
+//   // --------------------------------------------------
 
 //   let decoded;
 
@@ -205,10 +431,16 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Find refresh session
+//   // --------------------------------------------------
+
 //   const session =
 //     await RefreshSession.findById(
 //       decoded.sessionId
 //     );
+
 
 //   if (!session) {
 //     throw new Error(
@@ -216,12 +448,21 @@
 //     );
 //   }
 
-//   // Token already revoked = possible replay.
+
+//   // --------------------------------------------------
+//   // Check revoked token
+//   // --------------------------------------------------
+
 //   if (session.revokedAt) {
 //     throw new Error(
 //       "Refresh token has already been revoked."
 //     );
 //   }
+
+
+//   // --------------------------------------------------
+//   // Check expiration
+//   // --------------------------------------------------
 
 //   if (
 //     session.expiresAt.getTime() <
@@ -232,8 +473,14 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Compare token hash
+//   // --------------------------------------------------
+
 //   const incomingTokenHash =
 //     hashToken(refreshToken);
+
 
 //   if (
 //     incomingTokenHash !==
@@ -244,13 +491,26 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Find user
+//   // --------------------------------------------------
+
 //   const user = await User.findById(
 //     decoded.userId
 //   );
 
+
 //   if (!user) {
-//     throw new Error("User not found.");
+//     throw new Error(
+//       "User not found."
+//     );
 //   }
+
+
+//   // --------------------------------------------------
+//   // Check active status
+//   // --------------------------------------------------
 
 //   if (!user.isActive) {
 //     throw new Error(
@@ -258,15 +518,21 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Check suspended status
+//   // --------------------------------------------------
+
 //   if (user.isSuspended) {
 //     throw new Error(
 //       "Your account has been suspended."
 //     );
 //   }
 
-//   // --------------------------------------------------
-//   // Create replacement session
-//   // --------------------------------------------------
+
+//   // ==================================================
+//   // CREATE REPLACEMENT SESSION
+//   // ==================================================
 
 //   const newSession =
 //     await RefreshSession.create({
@@ -282,8 +548,14 @@
 //       ),
 
 //       userAgent,
+
 //       ipAddress,
 //     });
+
+
+//   // --------------------------------------------------
+//   // Generate new refresh token
+//   // --------------------------------------------------
 
 //   const newRefreshToken =
 //     generateRefreshToken({
@@ -291,33 +563,72 @@
 //       sessionId: newSession._id,
 //     });
 
+
+//   // --------------------------------------------------
+//   // Store new refresh token hash
+//   // --------------------------------------------------
+
 //   newSession.tokenHash =
 //     hashToken(newRefreshToken);
 
 //   await newSession.save();
 
-//   // Revoke old session.
-//   session.revokedAt = new Date();
+
+//   // --------------------------------------------------
+//   // Revoke old session
+//   // --------------------------------------------------
+
+//   session.revokedAt =
+//     new Date();
+
 //   session.replacedByTokenHash =
 //     newSession.tokenHash;
 
 //   await session.save();
 
+
+//   // --------------------------------------------------
+//   // Generate new access token
+//   // --------------------------------------------------
+
 //   const accessToken =
 //     generateAccessToken(user);
 
+
+//   // --------------------------------------------------
+//   // Return refreshed session
+//   // --------------------------------------------------
+
 //   return {
 //     accessToken,
-//     refreshToken: newRefreshToken,
+
+//     refreshToken:
+//       newRefreshToken,
 
 //     user: {
 //       id: user._id,
+
 //       name: user.name,
+
 //       email: user.email,
+
+//       phone: user.phone,
+
+//       address: user.address,
+
 //       role: user.role,
+
+//       profileImage:
+//         user.profileImage,
+
 //       isEmailVerified:
 //         user.isEmailVerified,
-//       isActive: user.isActive,
+
+//       isActive:
+//         user.isActive,
+
+//       isSuspended:
+//         user.isSuspended,
 //     },
 //   };
 // }
@@ -330,18 +641,34 @@
 // export async function logoutUser(
 //   refreshToken
 // ) {
+//   // --------------------------------------------------
+//   // No token means nothing to logout
+//   // --------------------------------------------------
+
 //   if (!refreshToken) {
 //     return;
 //   }
 
+
+//   // --------------------------------------------------
+//   // Hash refresh token
+//   // --------------------------------------------------
+
 //   const tokenHash =
 //     hashToken(refreshToken);
+
+
+//   // --------------------------------------------------
+//   // Revoke current session
+//   // --------------------------------------------------
 
 //   await RefreshSession.findOneAndUpdate(
 //     {
 //       tokenHash,
+
 //       revokedAt: null,
 //     },
+
 //     {
 //       $set: {
 //         revokedAt: new Date(),
@@ -358,11 +685,17 @@
 // export async function logoutAllSessions(
 //   userId
 // ) {
+//   // --------------------------------------------------
+//   // Revoke all active sessions
+//   // --------------------------------------------------
+
 //   await RefreshSession.updateMany(
 //     {
 //       user: userId,
+
 //       revokedAt: null,
 //     },
+
 //     {
 //       $set: {
 //         revokedAt: new Date(),
@@ -379,9 +712,18 @@
 // export async function getCurrentUser(
 //   userId
 // ) {
+//   // --------------------------------------------------
+//   // Get user without password
+//   // --------------------------------------------------
+
 //   const user = await User.findById(
 //     userId
 //   ).select("-password");
+
+
+//   // --------------------------------------------------
+//   // User not found
+//   // --------------------------------------------------
 
 //   if (!user) {
 //     throw new Error(
@@ -389,17 +731,28 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Check active status
+//   // --------------------------------------------------
+
 //   if (!user.isActive) {
 //     throw new Error(
 //       "Your account is inactive."
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Check suspended status
+//   // --------------------------------------------------
+
 //   if (user.isSuspended) {
 //     throw new Error(
 //       "Your account is suspended."
 //     );
 //   }
+
 
 //   return user;
 // }
@@ -413,25 +766,37 @@
 //   email,
 //   purpose,
 // }) {
+//   // --------------------------------------------------
+//   // Normalize email
+//   // --------------------------------------------------
+
 //   const normalizedEmail =
 //     email.toLowerCase().trim();
+
+
+//   // --------------------------------------------------
+//   // Get latest OTP
+//   // --------------------------------------------------
 
 //   const latestOtp =
 //     await Otp.findOne({
 //       email: normalizedEmail,
+
 //       purpose,
 //     }).sort({
 //       createdAt: -1,
 //     });
 
-//   // ---------------------------------------------
-//   // Resend cooldown
-//   // ---------------------------------------------
+
+//   // ==================================================
+//   // RESEND COOLDOWN
+//   // ==================================================
 
 //   if (latestOtp?.lastSentAt) {
 //     const timeSinceLastSent =
 //       Date.now() -
 //       latestOtp.lastSentAt.getTime();
+
 
 //     if (
 //       timeSinceLastSent <
@@ -439,10 +804,12 @@
 //     ) {
 //       const remainingSeconds =
 //         Math.ceil(
-//           (OTP_RESEND_COOLDOWN_MS -
-//             timeSinceLastSent) /
-//             1000
+//           (
+//             OTP_RESEND_COOLDOWN_MS -
+//             timeSinceLastSent
+//           ) / 1000
 //         );
+
 
 //       throw new Error(
 //         `Please wait ${remainingSeconds} seconds before requesting another OTP.`
@@ -450,17 +817,22 @@
 //     }
 //   }
 
-//   // ---------------------------------------------
-//   // Invalidate previous OTPs
-//   // ---------------------------------------------
+
+//   // ==================================================
+//   // INVALIDATE PREVIOUS OTPS
+//   // ==================================================
 
 //   await Otp.updateMany(
 //     {
 //       email: normalizedEmail,
+
 //       purpose,
+
 //       verified: false,
+
 //       consumed: false,
 //     },
+
 //     {
 //       $set: {
 //         consumed: true,
@@ -468,12 +840,18 @@
 //     }
 //   );
 
-//   // ---------------------------------------------
-//   // Generate OTP
-//   // ---------------------------------------------
+
+//   // ==================================================
+//   // GENERATE OTP
+//   // ==================================================
 
 //   const otp =
 //     generateOtp();
+
+
+//   // --------------------------------------------------
+//   // Hash OTP
+//   // --------------------------------------------------
 
 //   const otpHash =
 //     crypto
@@ -481,30 +859,50 @@
 //       .update(otp)
 //       .digest("hex");
 
+
+//   // --------------------------------------------------
+//   // OTP expiration
+//   // --------------------------------------------------
+
 //   const expiresAt =
 //     new Date(
 //       Date.now() +
 //         10 * 60 * 1000
 //     );
 
-//   // ---------------------------------------------
-//   // Save OTP
-//   // ---------------------------------------------
+
+//   // ==================================================
+//   // SAVE OTP
+//   // ==================================================
 
 //   await Otp.create({
 //     email: normalizedEmail,
+
 //     otpHash,
+
 //     purpose,
+
 //     attempts: 0,
+
 //     maxAttempts: 5,
+
 //     expiresAt,
+
 //     verified: false,
+
 //     consumed: false,
+
 //     lastSentAt: new Date(),
 //   });
 
+
+//   // --------------------------------------------------
+//   // Return OTP
+//   // --------------------------------------------------
+
 //   return {
 //     otp,
+
 //     expiresAt,
 //   };
 // }
@@ -519,18 +917,35 @@
 //   otp,
 //   purpose,
 // }) {
+//   // --------------------------------------------------
+//   // Normalize email
+//   // --------------------------------------------------
+
 //   const normalizedEmail =
 //     email.toLowerCase().trim();
+
+
+//   // --------------------------------------------------
+//   // Find latest valid OTP
+//   // --------------------------------------------------
 
 //   const otpRecord =
 //     await Otp.findOne({
 //       email: normalizedEmail,
+
 //       purpose,
+
 //       verified: false,
+
 //       consumed: false,
 //     }).sort({
 //       createdAt: -1,
 //     });
+
+
+//   // --------------------------------------------------
+//   // OTP not found
+//   // --------------------------------------------------
 
 //   if (!otpRecord) {
 //     throw new Error(
@@ -538,7 +953,11 @@
 //     );
 //   }
 
-//   // Check expiration.
+
+//   // --------------------------------------------------
+//   // Check expiration
+//   // --------------------------------------------------
+
 //   if (
 //     otpRecord.expiresAt.getTime() <
 //     Date.now()
@@ -548,7 +967,11 @@
 //     );
 //   }
 
-//   // Check attempt limit.
+
+//   // --------------------------------------------------
+//   // Check attempt limit
+//   // --------------------------------------------------
+
 //   if (
 //     otpRecord.attempts >=
 //     otpRecord.maxAttempts
@@ -558,10 +981,21 @@
 //     );
 //   }
 
-//   const otpHash = crypto
-//     .createHash("sha256")
-//     .update(otp)
-//     .digest("hex");
+
+//   // --------------------------------------------------
+//   // Hash entered OTP
+//   // --------------------------------------------------
+
+//   const otpHash =
+//     crypto
+//       .createHash("sha256")
+//       .update(otp)
+//       .digest("hex");
+
+
+//   // --------------------------------------------------
+//   // Compare OTP
+//   // --------------------------------------------------
 
 //   if (
 //     otpHash !==
@@ -576,10 +1010,19 @@
 //     );
 //   }
 
-//   // OTP is verified but not consumed yet.
+
+//   // --------------------------------------------------
+//   // Mark OTP verified
+//   // --------------------------------------------------
+//   //
+//   // Do NOT consume it here because forgot-password
+//   // flow needs the verified OTP before password reset.
+//   //
+
 //   otpRecord.verified = true;
 
 //   await otpRecord.save();
+
 
 //   return true;
 // }
@@ -592,13 +1035,23 @@
 // export async function requestForgotPasswordOtp(
 //   email
 // ) {
+//   // --------------------------------------------------
+//   // Normalize email
+//   // --------------------------------------------------
+
 //   const normalizedEmail =
 //     email.toLowerCase().trim();
+
+
+//   // --------------------------------------------------
+//   // Find user
+//   // --------------------------------------------------
 
 //   const user =
 //     await User.findOne({
 //       email: normalizedEmail,
 //     });
+
 
 //   /*
 //    * Important security rule:
@@ -607,11 +1060,21 @@
 //    * exists or not.
 //    */
 
+
+//   // --------------------------------------------------
+//   // User doesn't exist
+//   // --------------------------------------------------
+
 //   if (!user) {
 //     return {
 //       sent: false,
 //     };
 //   }
+
+
+//   // --------------------------------------------------
+//   // User inactive
+//   // --------------------------------------------------
 
 //   if (!user.isActive) {
 //     return {
@@ -619,16 +1082,31 @@
 //     };
 //   }
 
-//   const { otp, expiresAt } =
-//     await createOtp({
-//       email: normalizedEmail,
-//       purpose:
-//         "FORGOT_PASSWORD",
-//     });
+
+//   // --------------------------------------------------
+//   // Create forgot password OTP
+//   // --------------------------------------------------
+
+//   const {
+//     otp,
+//     expiresAt,
+//   } = await createOtp({
+//     email: normalizedEmail,
+
+//     purpose:
+//       "FORGOT_PASSWORD",
+//   });
+
+
+//   // --------------------------------------------------
+//   // Return result
+//   // --------------------------------------------------
 
 //   return {
 //     sent: true,
+
 //     otp,
+
 //     expiresAt,
 //   };
 // }
@@ -642,22 +1120,39 @@
 //   email,
 //   otp,
 // }) {
+//   // --------------------------------------------------
+//   // Normalize email
+//   // --------------------------------------------------
+
 //   const normalizedEmail =
 //     email.toLowerCase().trim();
+
+
+//   // --------------------------------------------------
+//   // Verify OTP
+//   // --------------------------------------------------
 
 //   const verified =
 //     await verifyOtp({
 //       email: normalizedEmail,
+
 //       otp,
+
 //       purpose:
 //         "FORGOT_PASSWORD",
 //     });
+
+
+//   // --------------------------------------------------
+//   // Verification failed
+//   // --------------------------------------------------
 
 //   if (!verified) {
 //     throw new Error(
 //       "OTP verification failed."
 //     );
 //   }
+
 
 //   return true;
 // }
@@ -671,13 +1166,27 @@
 //   email,
 //   newPassword,
 // }) {
+//   // --------------------------------------------------
+//   // Normalize email
+//   // --------------------------------------------------
+
 //   const normalizedEmail =
 //     email.toLowerCase().trim();
+
+
+//   // --------------------------------------------------
+//   // Find user
+//   // --------------------------------------------------
 
 //   const user =
 //     await User.findOne({
 //       email: normalizedEmail,
 //     }).select("+password");
+
+
+//   // --------------------------------------------------
+//   // User not found
+//   // --------------------------------------------------
 
 //   if (!user) {
 //     throw new Error(
@@ -685,20 +1194,36 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Hash new password
+//   // --------------------------------------------------
+
 //   const hashedPassword =
 //     await hashPassword(
 //       newPassword
 //     );
 
+
+//   // --------------------------------------------------
+//   // Update password
+//   // --------------------------------------------------
+
 //   user.password =
 //     hashedPassword;
 
+
 //   await user.save();
 
-//   // Invalidate every existing login session.
+
+//   // --------------------------------------------------
+//   // Invalidate every existing session
+//   // --------------------------------------------------
+
 //   await logoutAllSessions(
 //     user._id
 //   );
+
 
 //   return true;
 // }
@@ -713,10 +1238,19 @@
 //   currentPassword,
 //   newPassword,
 // }) {
+//   // --------------------------------------------------
+//   // Find user
+//   // --------------------------------------------------
+
 //   const user =
 //     await User.findById(
 //       userId
 //     ).select("+password");
+
+
+//   // --------------------------------------------------
+//   // User not found
+//   // --------------------------------------------------
 
 //   if (!user) {
 //     throw new Error(
@@ -724,11 +1258,17 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Compare current password
+//   // --------------------------------------------------
+
 //   const currentPasswordValid =
 //     await comparePassword(
 //       currentPassword,
 //       user.password
 //     );
+
 
 //   if (!currentPasswordValid) {
 //     throw new Error(
@@ -736,11 +1276,17 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Check same password
+//   // --------------------------------------------------
+
 //   const isSamePassword =
 //     await comparePassword(
 //       newPassword,
 //       user.password
 //     );
+
 
 //   if (isSamePassword) {
 //     throw new Error(
@@ -748,20 +1294,36 @@
 //     );
 //   }
 
+
+//   // --------------------------------------------------
+//   // Hash new password
+//   // --------------------------------------------------
+
 //   const hashedPassword =
 //     await hashPassword(
 //       newPassword
 //     );
 
+
+//   // --------------------------------------------------
+//   // Save new password
+//   // --------------------------------------------------
+
 //   user.password =
 //     hashedPassword;
 
+
 //   await user.save();
 
-//   // Invalidate all existing refresh sessions.
+
+//   // --------------------------------------------------
+//   // Invalidate all existing refresh sessions
+//   // --------------------------------------------------
+
 //   await logoutAllSessions(
 //     user._id
 //   );
+
 
 //   return true;
 // }
@@ -812,7 +1374,7 @@ const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
 // This service validates the role again so that even if
 // this function is called from another place, an invalid
 // role cannot be stored in MongoDB.
-//
+// ======================================================
 
 const ALLOWED_ROLES = [
   "SUPER_ADMIN",
@@ -820,6 +1382,73 @@ const ALLOWED_ROLES = [
   "INSTRUCTOR",
   "STUDENT",
 ];
+
+
+// ======================================================
+// OTP PURPOSE CONFIGURATION
+// ======================================================
+
+const ALLOWED_OTP_PURPOSES = [
+  "EMAIL_VERIFICATION",
+  "FORGOT_PASSWORD",
+];
+
+
+// ======================================================
+// EMAIL VALIDATION
+// ======================================================
+//
+// IMPORTANT:
+//
+// This validates email FORMAT.
+//
+// Examples rejected:
+//
+// abc
+// abc@
+// abc@gmail
+// @gmail.com
+// abc gmail.com
+//
+// A correctly formatted email cannot be guaranteed to
+// represent a real mailbox until the user successfully
+// receives and verifies the OTP.
+// ======================================================
+
+function validateAndNormalizeEmail(email) {
+  if (
+    email === undefined ||
+    email === null ||
+    String(email).trim() === ""
+  ) {
+    throw new Error(
+      "Email address is required."
+    );
+  }
+
+  const normalizedEmail =
+    String(email)
+      .trim()
+      .toLowerCase();
+
+  const emailRegex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(normalizedEmail)) {
+    throw new Error(
+      "Please enter a valid email address."
+    );
+  }
+
+  // Prevent unreasonable email length.
+  if (normalizedEmail.length > 254) {
+    throw new Error(
+      "Please enter a valid email address."
+    );
+  }
+
+  return normalizedEmail;
+}
 
 
 // ======================================================
@@ -835,29 +1464,35 @@ export async function registerUser({
   role = "STUDENT",
 }) {
   // --------------------------------------------------
-  // Normalize email
+  // Validate and normalize email
   // --------------------------------------------------
 
-  const normalizedEmail = email
-    .toLowerCase()
-    .trim();
+  const normalizedEmail =
+    validateAndNormalizeEmail(email);
 
 
   // --------------------------------------------------
   // Normalize role
   // --------------------------------------------------
 
-  const normalizedRole = String(role || "")
-    .trim()
-    .toUpperCase();
+  const normalizedRole =
+    String(role || "")
+      .trim()
+      .toUpperCase();
 
 
   // --------------------------------------------------
   // Validate role
   // --------------------------------------------------
 
-  if (!ALLOWED_ROLES.includes(normalizedRole)) {
-    throw new Error("Invalid user role.");
+  if (
+    !ALLOWED_ROLES.includes(
+      normalizedRole
+    )
+  ) {
+    throw new Error(
+      "Invalid user role."
+    );
   }
 
 
@@ -865,9 +1500,10 @@ export async function registerUser({
   // Check existing user
   // --------------------------------------------------
 
-  const existingUser = await User.findOne({
-    email: normalizedEmail,
-  });
+  const existingUser =
+    await User.findOne({
+      email: normalizedEmail,
+    });
 
 
   if (existingUser) {
@@ -882,7 +1518,9 @@ export async function registerUser({
   // --------------------------------------------------
 
   const hashedPassword =
-    await hashPassword(password);
+    await hashPassword(
+      password
+    );
 
 
   // --------------------------------------------------
@@ -890,13 +1528,17 @@ export async function registerUser({
   // --------------------------------------------------
 
   const userData = {
-    name: name?.trim(),
+    name:
+      name?.trim(),
 
-    email: normalizedEmail,
+    email:
+      normalizedEmail,
 
-    password: hashedPassword,
+    password:
+      hashedPassword,
 
-    role: normalizedRole,
+    role:
+      normalizedRole,
   };
 
 
@@ -928,10 +1570,11 @@ export async function registerUser({
   //
   // If address is not provided, MongoDB model defaults
   // will be used.
-  //
+  // --------------------------------------------------
 
   if (address !== undefined) {
-    userData.address = address;
+    userData.address =
+      address;
   }
 
 
@@ -939,9 +1582,10 @@ export async function registerUser({
   // Create user
   // --------------------------------------------------
 
-  const user = await User.create(
-    userData
-  );
+  const user =
+    await User.create(
+      userData
+    );
 
 
   // --------------------------------------------------
@@ -949,22 +1593,29 @@ export async function registerUser({
   // --------------------------------------------------
   //
   // Never return password.
-  //
+  // --------------------------------------------------
 
   return {
-    id: user._id,
+    id:
+      user._id,
 
-    name: user.name,
+    name:
+      user.name,
 
-    email: user.email,
+    email:
+      user.email,
 
-    phone: user.phone,
+    phone:
+      user.phone,
 
-    address: user.address,
+    address:
+      user.address,
 
-    role: user.role,
+    role:
+      user.role,
 
-    profileImage: user.profileImage,
+    profileImage:
+      user.profileImage,
 
     isEmailVerified:
       user.isEmailVerified,
@@ -992,25 +1643,44 @@ export async function loginUser({
   ipAddress,
 }) {
   // --------------------------------------------------
-  // Normalize email
+  // Validate and normalize email
   // --------------------------------------------------
 
   const normalizedEmail =
-    email.toLowerCase().trim();
+    validateAndNormalizeEmail(
+      email
+    );
 
 
   // --------------------------------------------------
   // Find user including password
   // --------------------------------------------------
 
-  const user = await User.findOne({
-    email: normalizedEmail,
-  }).select("+password");
+  const user =
+    await User.findOne({
+      email:
+        normalizedEmail,
+    }).select("+password");
 
+
+  // --------------------------------------------------
+  // User not found
+  // --------------------------------------------------
 
   if (!user) {
     throw new Error(
       "Invalid email or password."
+    );
+  }
+
+
+  // --------------------------------------------------
+  // Check email verification
+  // --------------------------------------------------
+
+  if (!user.isEmailVerified) {
+    throw new Error(
+      "Please verify your email address before logging in."
     );
   }
 
@@ -1059,7 +1729,8 @@ export async function loginUser({
   // Update last login
   // --------------------------------------------------
 
-  user.lastLogin = new Date();
+  user.lastLogin =
+    new Date();
 
   await user.save();
 
@@ -1070,16 +1741,23 @@ export async function loginUser({
 
   const session =
     await RefreshSession.create({
-      user: user._id,
+      user:
+        user._id,
 
-      tokenHash: crypto
-        .randomBytes(32)
-        .toString("hex"),
+      tokenHash:
+        crypto
+          .randomBytes(32)
+          .toString("hex"),
 
-      expiresAt: new Date(
-        Date.now() +
-          7 * 24 * 60 * 60 * 1000
-      ),
+      expiresAt:
+        new Date(
+          Date.now() +
+            7 *
+              24 *
+              60 *
+              60 *
+              1000
+        ),
 
       userAgent,
 
@@ -1093,8 +1771,11 @@ export async function loginUser({
 
   const refreshToken =
     generateRefreshToken({
-      userId: user._id,
-      sessionId: session._id,
+      userId:
+        user._id,
+
+      sessionId:
+        session._id,
     });
 
 
@@ -1103,7 +1784,9 @@ export async function loginUser({
   // --------------------------------------------------
 
   session.tokenHash =
-    hashToken(refreshToken);
+    hashToken(
+      refreshToken
+    );
 
   await session.save();
 
@@ -1113,7 +1796,9 @@ export async function loginUser({
   // --------------------------------------------------
 
   const accessToken =
-    generateAccessToken(user);
+    generateAccessToken(
+      user
+    );
 
 
   // --------------------------------------------------
@@ -1122,17 +1807,23 @@ export async function loginUser({
 
   return {
     user: {
-      id: user._id,
+      id:
+        user._id,
 
-      name: user.name,
+      name:
+        user.name,
 
-      email: user.email,
+      email:
+        user.email,
 
-      phone: user.phone,
+      phone:
+        user.phone,
 
-      address: user.address,
+      address:
+        user.address,
 
-      role: user.role,
+      role:
+        user.role,
 
       profileImage:
         user.profileImage,
@@ -1181,14 +1872,17 @@ export async function refreshAccessToken(
   let decoded;
 
   try {
-    const jwt = await import(
-      "jsonwebtoken"
-    );
+    const jwt =
+      await import(
+        "jsonwebtoken"
+      );
 
-    decoded = jwt.default.verify(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET
-    );
+    decoded =
+      jwt.default.verify(
+        refreshToken,
+        process.env.JWT_REFRESH_SECRET
+      );
+
   } catch {
     throw new Error(
       "Invalid or expired refresh token."
@@ -1243,7 +1937,9 @@ export async function refreshAccessToken(
   // --------------------------------------------------
 
   const incomingTokenHash =
-    hashToken(refreshToken);
+    hashToken(
+      refreshToken
+    );
 
 
   if (
@@ -1260,14 +1956,26 @@ export async function refreshAccessToken(
   // Find user
   // --------------------------------------------------
 
-  const user = await User.findById(
-    decoded.userId
-  );
+  const user =
+    await User.findById(
+      decoded.userId
+    );
 
 
   if (!user) {
     throw new Error(
       "User not found."
+    );
+  }
+
+
+  // --------------------------------------------------
+  // Check email verification
+  // --------------------------------------------------
+
+  if (!user.isEmailVerified) {
+    throw new Error(
+      "Please verify your email address before continuing."
     );
   }
 
@@ -1294,22 +2002,29 @@ export async function refreshAccessToken(
   }
 
 
-  // ==================================================
-  // CREATE REPLACEMENT SESSION
-  // ==================================================
+  // --------------------------------------------------
+  // Create replacement session
+  // --------------------------------------------------
 
   const newSession =
     await RefreshSession.create({
-      user: user._id,
+      user:
+        user._id,
 
-      tokenHash: crypto
-        .randomBytes(32)
-        .toString("hex"),
+      tokenHash:
+        crypto
+          .randomBytes(32)
+          .toString("hex"),
 
-      expiresAt: new Date(
-        Date.now() +
-          7 * 24 * 60 * 60 * 1000
-      ),
+      expiresAt:
+        new Date(
+          Date.now() +
+            7 *
+              24 *
+              60 *
+              60 *
+              1000
+        ),
 
       userAgent,
 
@@ -1323,8 +2038,11 @@ export async function refreshAccessToken(
 
   const newRefreshToken =
     generateRefreshToken({
-      userId: user._id,
-      sessionId: newSession._id,
+      userId:
+        user._id,
+
+      sessionId:
+        newSession._id,
     });
 
 
@@ -1333,7 +2051,9 @@ export async function refreshAccessToken(
   // --------------------------------------------------
 
   newSession.tokenHash =
-    hashToken(newRefreshToken);
+    hashToken(
+      newRefreshToken
+    );
 
   await newSession.save();
 
@@ -1356,7 +2076,9 @@ export async function refreshAccessToken(
   // --------------------------------------------------
 
   const accessToken =
-    generateAccessToken(user);
+    generateAccessToken(
+      user
+    );
 
 
   // --------------------------------------------------
@@ -1370,17 +2092,23 @@ export async function refreshAccessToken(
       newRefreshToken,
 
     user: {
-      id: user._id,
+      id:
+        user._id,
 
-      name: user.name,
+      name:
+        user.name,
 
-      email: user.email,
+      email:
+        user.email,
 
-      phone: user.phone,
+      phone:
+        user.phone,
 
-      address: user.address,
+      address:
+        user.address,
 
-      role: user.role,
+      role:
+        user.role,
 
       profileImage:
         user.profileImage,
@@ -1419,7 +2147,9 @@ export async function logoutUser(
   // --------------------------------------------------
 
   const tokenHash =
-    hashToken(refreshToken);
+    hashToken(
+      refreshToken
+    );
 
 
   // --------------------------------------------------
@@ -1430,12 +2160,14 @@ export async function logoutUser(
     {
       tokenHash,
 
-      revokedAt: null,
+      revokedAt:
+        null,
     },
 
     {
       $set: {
-        revokedAt: new Date(),
+        revokedAt:
+          new Date(),
       },
     }
   );
@@ -1455,14 +2187,17 @@ export async function logoutAllSessions(
 
   await RefreshSession.updateMany(
     {
-      user: userId,
+      user:
+        userId,
 
-      revokedAt: null,
+      revokedAt:
+        null,
     },
 
     {
       $set: {
-        revokedAt: new Date(),
+        revokedAt:
+          new Date(),
       },
     }
   );
@@ -1480,9 +2215,10 @@ export async function getCurrentUser(
   // Get user without password
   // --------------------------------------------------
 
-  const user = await User.findById(
-    userId
-  ).select("-password");
+  const user =
+    await User.findById(
+      userId
+    ).select("-password");
 
 
   // --------------------------------------------------
@@ -1492,6 +2228,17 @@ export async function getCurrentUser(
   if (!user) {
     throw new Error(
       "User not found."
+    );
+  }
+
+
+  // --------------------------------------------------
+  // Check email verification
+  // --------------------------------------------------
+
+  if (!user.isEmailVerified) {
+    throw new Error(
+      "Please verify your email address."
     );
   }
 
@@ -1523,7 +2270,7 @@ export async function getCurrentUser(
 
 
 // ======================================================
-// OTP
+// CREATE OTP
 // ======================================================
 
 export async function createOtp({
@@ -1531,11 +2278,28 @@ export async function createOtp({
   purpose,
 }) {
   // --------------------------------------------------
-  // Normalize email
+  // Validate and normalize email
   // --------------------------------------------------
 
   const normalizedEmail =
-    email.toLowerCase().trim();
+    validateAndNormalizeEmail(
+      email
+    );
+
+
+  // --------------------------------------------------
+  // Validate OTP purpose
+  // --------------------------------------------------
+
+  if (
+    !ALLOWED_OTP_PURPOSES.includes(
+      purpose
+    )
+  ) {
+    throw new Error(
+      "Invalid OTP purpose."
+    );
+  }
 
 
   // --------------------------------------------------
@@ -1544,11 +2308,13 @@ export async function createOtp({
 
   const latestOtp =
     await Otp.findOne({
-      email: normalizedEmail,
+      email:
+        normalizedEmail,
 
       purpose,
     }).sort({
-      createdAt: -1,
+      createdAt:
+        -1,
     });
 
 
@@ -1588,18 +2354,22 @@ export async function createOtp({
 
   await Otp.updateMany(
     {
-      email: normalizedEmail,
+      email:
+        normalizedEmail,
 
       purpose,
 
-      verified: false,
+      verified:
+        false,
 
-      consumed: false,
+      consumed:
+        false,
     },
 
     {
       $set: {
-        consumed: true,
+        consumed:
+          true,
       },
     }
   );
@@ -1620,7 +2390,9 @@ export async function createOtp({
   const otpHash =
     crypto
       .createHash("sha256")
-      .update(otp)
+      .update(
+        String(otp)
+      )
       .digest("hex");
 
 
@@ -1631,7 +2403,9 @@ export async function createOtp({
   const expiresAt =
     new Date(
       Date.now() +
-        10 * 60 * 1000
+        10 *
+          60 *
+          1000
     );
 
 
@@ -1639,25 +2413,32 @@ export async function createOtp({
   // SAVE OTP
   // ==================================================
 
-  await Otp.create({
-    email: normalizedEmail,
+  const otpRecord =
+    await Otp.create({
+      email:
+        normalizedEmail,
 
-    otpHash,
+      otpHash,
 
-    purpose,
+      purpose,
 
-    attempts: 0,
+      attempts:
+        0,
 
-    maxAttempts: 5,
+      maxAttempts:
+        5,
 
-    expiresAt,
+      expiresAt,
 
-    verified: false,
+      verified:
+        false,
 
-    consumed: false,
+      consumed:
+        false,
 
-    lastSentAt: new Date(),
-  });
+      lastSentAt:
+        new Date(),
+    });
 
 
   // --------------------------------------------------
@@ -1668,6 +2449,9 @@ export async function createOtp({
     otp,
 
     expiresAt,
+
+    otpId:
+      otpRecord._id,
   };
 }
 
@@ -1682,11 +2466,43 @@ export async function verifyOtp({
   purpose,
 }) {
   // --------------------------------------------------
-  // Normalize email
+  // Validate and normalize email
   // --------------------------------------------------
 
   const normalizedEmail =
-    email.toLowerCase().trim();
+    validateAndNormalizeEmail(
+      email
+    );
+
+
+  // --------------------------------------------------
+  // Validate OTP purpose
+  // --------------------------------------------------
+
+  if (
+    !ALLOWED_OTP_PURPOSES.includes(
+      purpose
+    )
+  ) {
+    throw new Error(
+      "Invalid OTP purpose."
+    );
+  }
+
+
+  // --------------------------------------------------
+  // Validate OTP value
+  // --------------------------------------------------
+
+  if (
+    otp === undefined ||
+    otp === null ||
+    String(otp).trim() === ""
+  ) {
+    throw new Error(
+      "OTP is required."
+    );
+  }
 
 
   // --------------------------------------------------
@@ -1695,15 +2511,19 @@ export async function verifyOtp({
 
   const otpRecord =
     await Otp.findOne({
-      email: normalizedEmail,
+      email:
+        normalizedEmail,
 
       purpose,
 
-      verified: false,
+      verified:
+        false,
 
-      consumed: false,
+      consumed:
+        false,
     }).sort({
-      createdAt: -1,
+      createdAt:
+        -1,
     });
 
 
@@ -1726,6 +2546,11 @@ export async function verifyOtp({
     otpRecord.expiresAt.getTime() <
     Date.now()
   ) {
+    otpRecord.consumed =
+      true;
+
+    await otpRecord.save();
+
     throw new Error(
       "OTP has expired."
     );
@@ -1740,6 +2565,11 @@ export async function verifyOtp({
     otpRecord.attempts >=
     otpRecord.maxAttempts
   ) {
+    otpRecord.consumed =
+      true;
+
+    await otpRecord.save();
+
     throw new Error(
       "Maximum OTP attempts exceeded."
     );
@@ -1753,7 +2583,9 @@ export async function verifyOtp({
   const otpHash =
     crypto
       .createHash("sha256")
-      .update(otp)
+      .update(
+        String(otp).trim()
+      )
       .digest("hex");
 
 
@@ -1765,9 +2597,32 @@ export async function verifyOtp({
     otpHash !==
     otpRecord.otpHash
   ) {
-    otpRecord.attempts += 1;
+    otpRecord.attempts +=
+      1;
+
+
+    // ----------------------------------------------
+    // Consume OTP when maximum attempts reached
+    // ----------------------------------------------
+
+    if (
+      otpRecord.attempts >=
+      otpRecord.maxAttempts
+    ) {
+      otpRecord.consumed =
+        true;
+    }
+
 
     await otpRecord.save();
+
+
+    if (otpRecord.consumed) {
+      throw new Error(
+        "Maximum OTP attempts exceeded. Please request a new OTP."
+      );
+    }
+
 
     throw new Error(
       "Invalid OTP."
@@ -1779,11 +2634,17 @@ export async function verifyOtp({
   // Mark OTP verified
   // --------------------------------------------------
   //
-  // Do NOT consume it here because forgot-password
-  // flow needs the verified OTP before password reset.
+  // Do NOT consume it here.
   //
+  // Forgot-password flow needs a verified OTP before
+  // password reset.
+  //
+  // Email-verification controller can consume it after
+  // successfully marking the user verified.
+  // --------------------------------------------------
 
-  otpRecord.verified = true;
+  otpRecord.verified =
+    true;
 
   await otpRecord.save();
 
@@ -1800,11 +2661,13 @@ export async function requestForgotPasswordOtp(
   email
 ) {
   // --------------------------------------------------
-  // Normalize email
+  // Validate and normalize email
   // --------------------------------------------------
 
   const normalizedEmail =
-    email.toLowerCase().trim();
+    validateAndNormalizeEmail(
+      email
+    );
 
 
   // --------------------------------------------------
@@ -1813,7 +2676,8 @@ export async function requestForgotPasswordOtp(
 
   const user =
     await User.findOne({
-      email: normalizedEmail,
+      email:
+        normalizedEmail,
     });
 
 
@@ -1831,7 +2695,8 @@ export async function requestForgotPasswordOtp(
 
   if (!user) {
     return {
-      sent: false,
+      sent:
+        false,
     };
   }
 
@@ -1842,7 +2707,20 @@ export async function requestForgotPasswordOtp(
 
   if (!user.isActive) {
     return {
-      sent: false,
+      sent:
+        false,
+    };
+  }
+
+
+  // --------------------------------------------------
+  // User suspended
+  // --------------------------------------------------
+
+  if (user.isSuspended) {
+    return {
+      sent:
+        false,
     };
   }
 
@@ -1854,12 +2732,14 @@ export async function requestForgotPasswordOtp(
   const {
     otp,
     expiresAt,
-  } = await createOtp({
-    email: normalizedEmail,
+  } =
+    await createOtp({
+      email:
+        normalizedEmail,
 
-    purpose:
-      "FORGOT_PASSWORD",
-  });
+      purpose:
+        "FORGOT_PASSWORD",
+    });
 
 
   // --------------------------------------------------
@@ -1867,7 +2747,8 @@ export async function requestForgotPasswordOtp(
   // --------------------------------------------------
 
   return {
-    sent: true,
+    sent:
+      true,
 
     otp,
 
@@ -1885,11 +2766,13 @@ export async function verifyForgotPasswordOtp({
   otp,
 }) {
   // --------------------------------------------------
-  // Normalize email
+  // Validate and normalize email
   // --------------------------------------------------
 
   const normalizedEmail =
-    email.toLowerCase().trim();
+    validateAndNormalizeEmail(
+      email
+    );
 
 
   // --------------------------------------------------
@@ -1898,7 +2781,8 @@ export async function verifyForgotPasswordOtp({
 
   const verified =
     await verifyOtp({
-      email: normalizedEmail,
+      email:
+        normalizedEmail,
 
       otp,
 
@@ -1931,11 +2815,13 @@ export async function resetPassword({
   newPassword,
 }) {
   // --------------------------------------------------
-  // Normalize email
+  // Validate and normalize email
   // --------------------------------------------------
 
   const normalizedEmail =
-    email.toLowerCase().trim();
+    validateAndNormalizeEmail(
+      email
+    );
 
 
   // --------------------------------------------------
@@ -1944,7 +2830,8 @@ export async function resetPassword({
 
   const user =
     await User.findOne({
-      email: normalizedEmail,
+      email:
+        normalizedEmail,
     }).select("+password");
 
 
@@ -1975,6 +2862,9 @@ export async function resetPassword({
 
   user.password =
     hashedPassword;
+
+  user.passwordChangedAt =
+    new Date();
 
 
   await user.save();
@@ -2019,6 +2909,28 @@ export async function changePassword({
   if (!user) {
     throw new Error(
       "User not found."
+    );
+  }
+
+
+  // --------------------------------------------------
+  // Check active status
+  // --------------------------------------------------
+
+  if (!user.isActive) {
+    throw new Error(
+      "Your account is inactive."
+    );
+  }
+
+
+  // --------------------------------------------------
+  // Check suspended status
+  // --------------------------------------------------
+
+  if (user.isSuspended) {
+    throw new Error(
+      "Your account has been suspended."
     );
   }
 
@@ -2075,6 +2987,9 @@ export async function changePassword({
 
   user.password =
     hashedPassword;
+
+  user.passwordChangedAt =
+    new Date();
 
 
   await user.save();

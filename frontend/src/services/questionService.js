@@ -255,3 +255,39 @@ export const getQuestionsByAssessment =
       throw error;
     }
   };
+
+
+  
+/**
+ * ======================================================
+ * BULK IMPORT QUESTIONS
+ * POST /api/questions/bulk-import
+ * ======================================================
+ *
+ * assessmentId: Selected assessment ID
+ * questions: Array of question objects
+ */
+
+export const bulkImportQuestions = async (
+  assessmentId,
+  questions
+) => {
+  try {
+    const response = await api.post(
+      "/questions/bulk-import",
+      {
+        assessmentId,
+        questions,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Bulk Import Questions API Error:",
+      error.response?.data || error.message
+    );
+
+    throw error;
+  }
+};

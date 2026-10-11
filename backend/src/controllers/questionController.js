@@ -531,3 +531,63 @@ export const getQuestionsByAssessment =
 
     }
   };
+
+
+  
+/**
+ * ======================================================
+ * BULK IMPORT QUESTIONS
+ * POST /api/questions/bulk-import
+ * ======================================================
+ */
+
+export const bulkImportQuestions = async (req, res) => {
+  try {
+    const userId = getUserId(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication required",
+      });
+    }
+
+    const { assessmentId, questions } = req.body;
+
+    if (!assessmentId) {
+      return res.status(400).json({
+        success: false,
+        message: "Assessment ID is required",
+      });
+    }
+
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide at least one question",
+      });
+    }
+
+    const result = await questionService.bulkImportQuestions(
+      assessmentId,
+      questions,
+      userId
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Bulk question import processed successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Bulk Import Questions Error:", error);
+
+    const statusCode =
+      error.message === "Assessment not found" ? 404 : 400;
+
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message || "Failed to import questions",
+    });
+  }
+};

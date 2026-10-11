@@ -168,11 +168,11 @@ const menuItems = [
     icon: "bi-book",
     path: "/student/courses",
   },
-  {
-    title: "Results",
-    icon: "bi-bar-chart",
-    path: "/student/results",
-  },
+  // {
+  //   title: "Results",
+  //   icon: "bi-bar-chart",
+  //   path: "/student/results",
+  // },
   {
     title: "Certificates",
     icon: "bi-award",
