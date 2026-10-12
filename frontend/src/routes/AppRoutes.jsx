@@ -1,4 +1,5 @@
 
+
 // import React from "react";
 
 // import {
@@ -11,15 +12,23 @@
 // // LAYOUTS
 // // ======================================================
 
-// import AdminLayout from "../components/layout/AdminLayout.jsx";
-// import InstructorLayout from "../components/layout/InstructorLayout.jsx";
-// import StudentLayout from "../components/layout/StudentLayout.jsx";
+// import AdminLayout
+//   from "../components/layout/AdminLayout.jsx";
+
+// import InstructorLayout
+//   from "../components/layout/InstructorLayout.jsx";
+
+// import StudentLayout
+//   from "../components/layout/StudentLayout.jsx";
+
 
 // // ======================================================
 // // ADMIN PAGES
 // // ======================================================
 
-// import AdminDashboard from "../pages/admin/dashboard/AdminDashboard.jsx";
+// import AdminDashboard
+//   from "../pages/admin/dashboard/AdminDashboard.jsx";
+
 
 // // ======================================================
 // // ADMIN STUDENT MANAGEMENT
@@ -30,6 +39,18 @@
 
 // import StudentDetails
 //   from "../pages/admin/students/StudentDetails.jsx";
+
+
+// // ======================================================
+// // ADMIN STUDENT RESULTS
+// // ======================================================
+
+// import StudentResults
+//   from "../pages/admin/StudentResults.jsx";
+
+// import AssessmentAttemptResult
+//   from "../pages/admin/AssessmentAttemptResult.jsx";
+
 
 // // ======================================================
 // // ASSESSMENT PAGES
@@ -50,6 +71,7 @@
 // import AssessmentAssignments
 //   from "../pages/admin/assessments/AssessmentAssignments.jsx";
 
+
 // // ======================================================
 // // STUDENT ASSESSMENT PAGES
 // // ======================================================
@@ -60,17 +82,14 @@
 // import StudentAssessmentDetails
 //   from "../pages/student/assessments/AssessmentDetails.jsx";
 
+
 // // ======================================================
 // // STUDENT ATTEMPT PAGES
 // // ======================================================
 
 // import StudentAttempt
 //   from "../pages/student/attempts/StudentAttempt.jsx";
-  
-//   import StudentResults
-//   from "../pages/admin/StudentResults.jsx";
-//   import AssessmentAttemptResult
-//   from "../pages/admin/AssessmentAttemptResult.jsx";
+
 
 // // ======================================================
 // // QUESTION PAGES
@@ -87,6 +106,7 @@
 
 // import EditQuestion
 //   from "../pages/admin/questions/EditQuestion.jsx";
+
 
 // // ======================================================
 // // AUTH PAGES
@@ -113,12 +133,14 @@
 // import Unauthorized
 //   from "../pages/auth/Unauthorized.jsx";
 
+
 // // ======================================================
 // // INSTRUCTOR
 // // ======================================================
 
 // import InstructorDashboard
 //   from "../pages/instructor/InstructorDashboard.jsx";
+
 
 // // ======================================================
 // // STUDENT
@@ -127,18 +149,25 @@
 // import StudentDashboard
 //   from "../pages/student/StudentDashboard.jsx";
 
+
 // // ======================================================
 // // ROUTE PROTECTION
 // // ======================================================
 
-// import ProtectedRoute from "./ProtectedRoute.jsx";
-// import RoleRoute from "./RoleRoute.jsx";
+// import ProtectedRoute
+//   from "./ProtectedRoute.jsx";
+
+// import RoleRoute
+//   from "./RoleRoute.jsx";
+
 
 // // ======================================================
 // // ADMIN PLACEHOLDER
 // // ======================================================
 
-// function AdminPlaceholder({ title }) {
+// function AdminPlaceholder({
+//   title,
+// }) {
 //   return (
 //     <div className="min-h-screen bg-gray-50 p-6">
 
@@ -154,6 +183,7 @@
 
 //       </div>
 
+
 //       <div className="flex min-h-[400px] items-center justify-center rounded-xl bg-white shadow-sm">
 
 //         <div className="text-center">
@@ -166,9 +196,11 @@
 
 //           </div>
 
+
 //           <h2 className="text-xl font-semibold text-gray-800">
 //             {title}
 //           </h2>
+
 
 //           <p className="mt-2 text-sm text-gray-500">
 //             Functionality coming soon.
@@ -182,6 +214,7 @@
 //   );
 // }
 
+
 // // ======================================================
 // // ADMIN ROLES
 // // ======================================================
@@ -190,6 +223,7 @@
 //   "ADMIN",
 //   "SUPER_ADMIN",
 // ];
+
 
 // // ======================================================
 // // APP ROUTES
@@ -200,6 +234,7 @@
 //   return (
 
 //     <Routes>
+
 
 //       {/* ==================================================
 //           AUTH ROUTES
@@ -240,6 +275,7 @@
 //         element={<Unauthorized />}
 //       />
 
+
 //       {/* ==================================================
 //           ROOT
 //           ================================================== */}
@@ -254,6 +290,7 @@
 //         }
 //       />
 
+
 //       {/* ==================================================
 //           ADMIN ROOT
 //           ================================================== */}
@@ -263,7 +300,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -280,6 +319,7 @@
 //         }
 //       />
 
+
 //       {/* ==================================================
 //           ADMIN DASHBOARD
 //           ================================================== */}
@@ -289,7 +329,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -303,6 +345,7 @@
 //         }
 //       />
 
+
 //       {/* ==================================================
 //           ADMIN USERS
 //           ================================================== */}
@@ -312,11 +355,15 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
-//                 <AdminPlaceholder title="Users" />
+//                 <AdminPlaceholder
+//                   title="Users"
+//                 />
 
 //               </AdminLayout>
 
@@ -325,6 +372,7 @@
 //           </ProtectedRoute>
 //         }
 //       />
+
 
 //       {/* ==================================================
 //           ADMIN COURSES
@@ -335,11 +383,15 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
-//                 <AdminPlaceholder title="Courses" />
+//                 <AdminPlaceholder
+//                   title="Courses"
+//                 />
 
 //               </AdminLayout>
 
@@ -348,6 +400,7 @@
 //           </ProtectedRoute>
 //         }
 //       />
+
 
 //       {/* ==================================================
 //           ADMIN CATEGORIES
@@ -358,11 +411,15 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
-//                 <AdminPlaceholder title="Categories" />
+//                 <AdminPlaceholder
+//                   title="Categories"
+//                 />
 
 //               </AdminLayout>
 
@@ -371,6 +428,7 @@
 //           </ProtectedRoute>
 //         }
 //       />
+
 
 //       {/* ==================================================
 //           ADMIN INSTRUCTORS
@@ -381,11 +439,15 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
-//                 <AdminPlaceholder title="Instructors" />
+//                 <AdminPlaceholder
+//                   title="Instructors"
+//                 />
 
 //               </AdminLayout>
 
@@ -394,6 +456,7 @@
 //           </ProtectedRoute>
 //         }
 //       />
+
 
 //       {/* ==================================================
 //           ADMIN STUDENTS
@@ -434,6 +497,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           STUDENT DETAILS
 
@@ -468,87 +532,97 @@
 //           </ProtectedRoute>
 //         }
 //       />
-//       {/* <Route
-//   path="/admin/assessments/:assessmentId/results"
-//   element={
-//     <RoleRoute
-//       allowedRoles={adminRoles}
-//     >
-//       <AssessmentResults />
-//     </RoleRoute>
-//   }
-// /> */}
-
-// <Route
-//   path="/admin/student-results"
-//   element={
-//     <ProtectedRoute>
-
-//       <RoleRoute
-//         allowedRoles={adminRoles}
-//       >
-
-//         <AdminLayout>
-
-//           <StudentResults />
-
-//         </AdminLayout>
-
-//       </RoleRoute>
-
-//     </ProtectedRoute>
-//   }
-// />
-// {/* ==================================================
-//     ADMIN STUDENT RESULT DETAILS
-//     ================================================== */}
-
-// <Route
-//   path="/admin/assessments/attempts/:attemptId/result"
-//   element={
-//     <ProtectedRoute>
-
-//       <RoleRoute
-//         allowedRoles={adminRoles}
-//       >
-
-//         <AdminLayout>
-
-//           <AssessmentAttemptResult />
-
-//         </AdminLayout>
-
-//       </RoleRoute>
-
-//     </ProtectedRoute>
-//   }
-// />
 
 
-// {/* ==================================================
-//     ADMIN STUDENT RESULT DETAILS
-//     ================================================== */}
+//       {/* ==================================================
+//           ADMIN STUDENT RESULTS
+//           ================================================== */}
 
-// <Route
-//   path="/admin/assessments/attempts/:attemptId/result"
-//   element={
-//     <ProtectedRoute>
 
-//       <RoleRoute
-//         allowedRoles={adminRoles}
-//       >
+//       {/* --------------------------------------------------
+//           STUDENT RESULTS LIST
 
-//         <AdminLayout>
+//           URL:
+//           /admin/student-results
 
-//           <AssessmentAttemptResult />
+//           PURPOSE:
+//           Shows all submitted student assessment results.
 
-//         </AdminLayout>
+//           Access:
+//           ADMIN
+//           SUPER_ADMIN
+//           -------------------------------------------------- */}
 
-//       </RoleRoute>
+//       <Route
+//         path="/admin/student-results"
+//         element={
+//           <ProtectedRoute>
 
-//     </ProtectedRoute>
-//   }
-// />
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
+
+//               <AdminLayout>
+
+//                 <StudentResults />
+
+//               </AdminLayout>
+
+//             </RoleRoute>
+
+//           </ProtectedRoute>
+//         }
+//       />
+
+
+//       {/* --------------------------------------------------
+//           STUDENT RESULT DETAILS
+
+//           URL:
+//           /admin/assessments/attempts/:attemptId/result
+
+//           PURPOSE:
+//           Shows complete result of one student attempt.
+
+//           Includes:
+//           - Student information
+//           - Assessment information
+//           - Score
+//           - Percentage
+//           - Pass / Fail
+//           - Question review
+//           - Student answers
+//           - Correct answers
+//           - Marks
+//           - Security information
+
+//           Access:
+//           ADMIN
+//           SUPER_ADMIN
+//           -------------------------------------------------- */}
+
+//       <Route
+//         path="/admin/assessments/attempts/:attemptId/result"
+//         element={
+//           <ProtectedRoute>
+
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
+
+//               <AdminLayout>
+
+//                 <AssessmentAttemptResult />
+
+//               </AdminLayout>
+
+//             </RoleRoute>
+
+//           </ProtectedRoute>
+//         }
+//       />
+
+
 //       {/* ==================================================
 //           ADMIN REPORTS
 //           ================================================== */}
@@ -558,11 +632,15 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
-//                 <AdminPlaceholder title="Reports" />
+//                 <AdminPlaceholder
+//                   title="Reports"
+//                 />
 
 //               </AdminLayout>
 
@@ -571,6 +649,7 @@
 //           </ProtectedRoute>
 //         }
 //       />
+
 
 //       {/* ==================================================
 //           ADMIN SETTINGS
@@ -581,11 +660,15 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
-//                 <AdminPlaceholder title="Settings" />
+//                 <AdminPlaceholder
+//                   title="Settings"
+//                 />
 
 //               </AdminLayout>
 
@@ -595,9 +678,11 @@
 //         }
 //       />
 
+
 //       {/* ==================================================
 //           ASSESSMENT MODULE
 //           ================================================== */}
+
 
 //       {/* --------------------------------------------------
 //           ASSESSMENT LIST
@@ -611,7 +696,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -625,6 +712,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           CREATE ASSESSMENT
 
@@ -637,7 +725,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -651,6 +741,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           EDIT ASSESSMENT
 
@@ -663,7 +754,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -677,6 +770,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           ASSIGN STUDENTS
 
@@ -689,7 +783,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -703,6 +799,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           ASSESSMENT DETAILS
 
@@ -715,7 +812,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -729,9 +828,11 @@
 //         }
 //       />
 
+
 //       {/* ==================================================
 //           STUDENT ASSESSMENT MODULE
 //           ================================================== */}
+
 
 //       {/* --------------------------------------------------
 //           STUDENT ASSESSMENT LIST
@@ -745,7 +846,11 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={["STUDENT"]}>
+//             <RoleRoute
+//               allowedRoles={[
+//                 "STUDENT",
+//               ]}
+//             >
 
 //               <StudentLayout>
 
@@ -759,6 +864,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           STUDENT ASSESSMENT DETAILS
 
@@ -771,7 +877,11 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={["STUDENT"]}>
+//             <RoleRoute
+//               allowedRoles={[
+//                 "STUDENT",
+//               ]}
+//             >
 
 //               <StudentLayout>
 
@@ -785,6 +895,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           STUDENT ATTEMPT
 
@@ -795,19 +906,20 @@
 //           Student can take the assessment here.
 
 //           IMPORTANT:
-//           This route is intentionally kept.
-
 //           After submission, StudentAttempt should NOT
 //           navigate to a result/review page.
 //           -------------------------------------------------- */}
 
-//       <Route
+//       {/* <Route
 //         path="/student/attempts/:attemptId"
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={["STUDENT"]}>
-
+//             <RoleRoute
+//               allowedRoles={[
+//                 "STUDENT",
+//               ]}
+//             >
 //               <StudentLayout>
 
 //                 <StudentAttempt />
@@ -818,11 +930,27 @@
 
 //           </ProtectedRoute>
 //         }
-//       />
+//       /> */}
+
+
+      
+// <Route
+//   path="/student/attempts/:attemptId"
+//   element={
+//     <ProtectedRoute>
+//       <RoleRoute allowedRoles={["STUDENT"]}>
+//         <StudentAttempt />
+//       </RoleRoute>
+//     </ProtectedRoute>
+//   }
+// />
+
+
 
 //       {/* ==================================================
 //           QUESTION MODULE
 //           ================================================== */}
+
 
 //       {/* --------------------------------------------------
 //           QUESTION LIST
@@ -836,7 +964,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -850,6 +980,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           CREATE QUESTION
 
@@ -862,7 +993,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -876,6 +1009,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           EDIT QUESTION
 
@@ -888,7 +1022,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -901,6 +1037,7 @@
 //           </ProtectedRoute>
 //         }
 //       />
+
 
 //       {/* --------------------------------------------------
 //           QUESTION DETAILS
@@ -917,7 +1054,9 @@
 //         element={
 //           <ProtectedRoute>
 
-//             <RoleRoute allowedRoles={adminRoles}>
+//             <RoleRoute
+//               allowedRoles={adminRoles}
+//             >
 
 //               <AdminLayout>
 
@@ -931,9 +1070,11 @@
 //         }
 //       />
 
+
 //       {/* ==================================================
 //           INSTRUCTOR
 //           ================================================== */}
+
 
 //       {/* --------------------------------------------------
 //           INSTRUCTOR ROOT
@@ -965,6 +1106,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           INSTRUCTOR DASHBOARD
 //           -------------------------------------------------- */}
@@ -992,9 +1134,11 @@
 //         }
 //       />
 
+
 //       {/* ==================================================
 //           STUDENT
 //           ================================================== */}
+
 
 //       {/* --------------------------------------------------
 //           STUDENT ROOT
@@ -1026,6 +1170,7 @@
 //         }
 //       />
 
+
 //       {/* --------------------------------------------------
 //           STUDENT DASHBOARD
 //           -------------------------------------------------- */}
@@ -1053,6 +1198,7 @@
 //         }
 //       />
 
+
 //       {/* ==================================================
 //           404
 //           ================================================== */}
@@ -1069,7 +1215,8 @@
 
 //     </Routes>
 //   );
-// }
+// } 
+
 
 
 
@@ -1083,6 +1230,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
+import Home from "../pages/Home.jsx";
 
 // ======================================================
 // LAYOUTS
@@ -1225,6 +1374,8 @@ import InstructorDashboard
 import StudentDashboard
   from "../pages/student/StudentDashboard.jsx";
 
+import ComingSoon from "../pages/student/CommingSoon.jsx";  
+
 
 // ======================================================
 // ROUTE PROTECTION
@@ -1356,15 +1507,14 @@ export default function AppRoutes() {
           ROOT
           ================================================== */}
 
-      <Route
-        path="/"
-        element={
-          <Navigate
-            to="/login"
-            replace
-          />
-        }
-      />
+      
+<Route
+  path="/"
+  element={<Home />}
+/>
+
+
+
 
 
       {/* ==================================================
@@ -1608,6 +1758,60 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* STUDENT COMING SOON PAGES */}
+
+<Route
+  path="/student/courses"
+  element={
+    <ProtectedRoute>
+      <RoleRoute allowedRoles={["STUDENT"]}>
+        <StudentLayout>
+          <ComingSoon />
+        </StudentLayout>
+      </RoleRoute>
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/student/certificates"
+  element={
+    <ProtectedRoute>
+      <RoleRoute allowedRoles={["STUDENT"]}>
+        <StudentLayout>
+          <ComingSoon />
+        </StudentLayout>
+      </RoleRoute>
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/student/profile"
+  element={
+    <ProtectedRoute>
+      <RoleRoute allowedRoles={["STUDENT"]}>
+        <StudentLayout>
+          <ComingSoon />
+        </StudentLayout>
+      </RoleRoute>
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/student/settings"
+  element={
+    <ProtectedRoute>
+      <RoleRoute allowedRoles={["STUDENT"]}>
+        <StudentLayout>
+          <ComingSoon />
+        </StudentLayout>
+      </RoleRoute>
+    </ProtectedRoute>
+  }
+/>
 
 
       {/* ==================================================
@@ -2279,16 +2483,10 @@ export default function AppRoutes() {
           404
           ================================================== */}
 
-      <Route
-        path="*"
-        element={
-          <Navigate
-            to="/login"
-            replace
-          />
-        }
-      />
+      
+
+
 
     </Routes>
   );
-} 
+}

@@ -1,0 +1,219 @@
+:root {
+  --student-navbar-height: 72px;
+  --student-sidebar-width: 260px;
+  --student-sidebar-collapsed-width: 80px;
+
+  --student-primary: #00323f;
+  --student-accent: #feca42;
+  --student-background: #f4f7fa;
+}
+
+/* ==========================================
+   GLOBAL
+========================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* ==========================================
+   FIXED APPLICATION FRAME
+========================================== */
+
+.admin-layout {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+
+  overflow: hidden;
+  background: var(--student-background);
+}
+
+/* ==========================================
+   MAIN CONTENT COLUMN
+========================================== */
+
+.admin-main {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: var(--student-sidebar-width);
+
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+
+  overflow: hidden;
+
+  transition: left 0.25s ease;
+}
+
+/* Desktop collapsed sidebar */
+
+.admin-main.main-collapsed {
+  left: var(--student-sidebar-collapsed-width);
+}
+
+/* ==========================================
+   DASHBOARD SCROLL AREA
+========================================== */
+
+.admin-content {
+  position: relative;
+
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+
+  width: 100%;
+  margin: 0;
+  padding: 24px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+
+  background: var(--student-background);
+}
+
+/* Dashboard children */
+
+.student-content-inner {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 100%;
+  overflow-x: clip;
+}
+
+/* Prevent large media from widening the dashboard */
+
+.student-content-inner img,
+.student-content-inner video,
+.student-content-inner canvas,
+.student-content-inner iframe {
+  max-width: 100%;
+}
+
+.student-content-inner pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.student-content-inner table {
+  max-width: 100%;
+}
+
+/* Dashboard scrollbar */
+
+.admin-content::-webkit-scrollbar {
+  width: 7px;
+}
+
+.admin-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-content::-webkit-scrollbar-thumb {
+  background: #cbd5dc;
+  border-radius: 10px;
+}
+
+.admin-content::-webkit-scrollbar-thumb:hover {
+  background: #9eabb4;
+}
+
+/* ==========================================
+   MOBILE SIDEBAR BACKDROP
+========================================== */
+
+.student-sidebar-backdrop {
+  display: none;
+}
+
+/* ==========================================
+   TABLET AND MOBILE
+========================================== */
+
+@media (max-width: 991px) {
+  :root {
+    --student-navbar-height: 64px;
+  }
+
+  .admin-main,
+  .admin-main.main-collapsed {
+    left: 0;
+    width: 100%;
+  }
+
+  .admin-content {
+    padding: 18px;
+  }
+
+  .student-sidebar-backdrop {
+    position: fixed;
+    inset: var(--student-navbar-height) 0 0;
+
+    display: block;
+
+    width: 100%;
+    height: auto;
+
+    padding: 0;
+    border: 0;
+    background: rgba(8, 27, 34, 0.42);
+
+    z-index: 1200;
+  }
+}
+
+@media (max-width: 575px) {
+  .admin-content {
+    padding: 12px;
+  }
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-main {
+    transition: none;
+  }
+}

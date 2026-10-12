@@ -148,6 +148,8 @@
 
 
 
+
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import logoImg from "../../assets/images/s-logo.png";
@@ -181,16 +183,16 @@ const menuItems = [
 ];
 
 const accountItems = [
-  {
-    title: "Profile",
-    icon: "bi-person",
-    path: "/student/profile",
-  },
-  {
-    title: "Settings",
-    icon: "bi-gear",
-    path: "/student/settings",
-  },
+  // {
+  //   title: "Profile",
+  //   icon: "bi-person",
+  //   path: "/student/profile",
+  // },
+  // {
+  //   title: "Settings",
+  //   icon: "bi-gear",
+  //   path: "/student/settings",
+  // },
 ];
 
 export default function StudentSidebar({ collapsed, mobileOpen, onClose }) {

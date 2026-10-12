@@ -1,231 +1,68 @@
 
-// import React, {
-//   useState,
-// } from "react";
-
-// import {
-//   useNavigate,
-// } from "react-router-dom";
+// import React, { useState } from "react";
+// import { useNavigate } from "react-router-dom";
 
 // import StudentSidebar from "../sidebar/StudentSidebar.jsx";
-// import AdminNavbar from "../navbar/AdminNavbar.jsx";
+// import StudentNavbar from "../navbar/StudentNavbar.jsx";
 
-// import {
-//   useAuth,
-// } from "../../context/AuthContext.jsx";
+// import { useAuth } from "../../context/AuthContext.jsx";
 
 // import "./layout.css";
 
+// export default function StudentLayout({ children }) {
+//   const [collapsed, setCollapsed] = useState(false);
+//   const [mobileOpen, setMobileOpen] = useState(false);
 
-// export default function StudentLayout({
-//   children,
-// }) {
+//   const { user, logout } = useAuth();
+//   const navigate = useNavigate();
 
-//   // ====================================================
-//   // STATE
-//   // ====================================================
-
-//   const [
-//     collapsed,
-//     setCollapsed,
-//   ] = useState(false);
-
-//   const [
-//     mobileOpen,
-//     setMobileOpen,
-//   ] = useState(false);
-
-
-//   // ====================================================
-//   // AUTH
-//   // ====================================================
-
-//   const {
-//     user,
-//     logout,
-//   } = useAuth();
-
-
-//   // ====================================================
-//   // NAVIGATION
-//   // ====================================================
-
-//   const navigate =
-//     useNavigate();
-
-
-//   // ====================================================
-//   // STUDENT LOGOUT
-//   // ====================================================
-
+//   // Student logout
 //   async function handleStudentLogout() {
-
 //     try {
-
-//       // ------------------------------------------------
-//       // Logout through AuthContext
-//       //
-//       // This calls your existing backend logout API,
-//       // clears access token,
-//       // clears user state,
-//       // and sets isAuthenticated=false.
-//       // ------------------------------------------------
-
 //       await logout();
-
 //     } catch (error) {
-
-//       console.error(
-//         "Student logout error:",
-//         error
-//       );
-
+//       console.error("Student logout error:", error);
 //     } finally {
-
-//       // ------------------------------------------------
-//       // Always go to login page
-//       // ------------------------------------------------
-
-//       navigate(
-//         "/login",
-//         {
-//           replace: true,
-//         }
-//       );
-
+//       navigate("/login", { replace: true });
 //     }
 //   }
 
-
-//   // ====================================================
-//   // SIDEBAR TOGGLE
-//   // ====================================================
-
+//   // Preserve desktop and mobile sidebar behavior
 //   function handleMenuClick() {
-
-//     if (
-//       window.innerWidth < 992
-//     ) {
-
-//       setMobileOpen(
-//         (previous) =>
-//           !previous
-//       );
-
+//     if (window.innerWidth < 992) {
+//       setMobileOpen((previous) => !previous);
 //     } else {
-
-//       setCollapsed(
-//         (previous) =>
-//           !previous
-//       );
-
+//       setCollapsed((previous) => !previous);
 //     }
 //   }
-
-
-//   // ====================================================
-//   // RENDER
-//   // ====================================================
 
 //   return (
 //     <div className="admin-layout d-flex min-vh-100 position-relative">
-
-//       {/* ==================================================
-//           SIDEBAR
-//       ================================================== */}
-
 //       <StudentSidebar
-//         collapsed={
-//           collapsed
-//         }
-
-//         mobileOpen={
-//           mobileOpen
-//         }
-
-//         onClose={() =>
-//           setMobileOpen(false)
-//         }
+//         collapsed={collapsed}
+//         mobileOpen={mobileOpen}
+//         onClose={() => setMobileOpen(false)}
 //       />
 
-
-//       {/* ==================================================
-//           MAIN CONTAINER
-//       ================================================== */}
-
 //       <div
-//         className={`
-//           admin-main
-//           flex-grow-1
-//           d-flex
-//           flex-column
-//           ${
-//             collapsed
-//               ? "main-collapsed"
-//               : ""
-//           }
-//         `}
+//         className={`admin-main flex-grow-1 d-flex flex-column ${
+//           collapsed ? "main-collapsed" : ""
+//         }`}
 //       >
-
-//         {/* ==================================================
-//             NAVBAR
-//         ================================================== */}
-
-//         <AdminNavbar
-
-//           /*
-//            * IMPORTANT:
-//            *
-//            * Pass the logged-in student from AuthContext.
-//            *
-//            * Previously this was missing, which caused
-//            * AdminNavbar to use:
-//            *
-//            * "Admin"
-//            * "Super Admin"
-//            */
-
-//           currentUser={
-//             user
-//           }
-
-
-//           /*
-//            * Pass Student logout function.
-//            *
-//            * Previously onLogout was undefined.
-//            */
-
-//           onLogout={
-//             handleStudentLogout
-//           }
-
-
-//           /*
-//            * AdminNavbar expects onToggleSidebar,
-//            * not onMenuClick.
-//            */
-
-//           onToggleSidebar={
-//             handleMenuClick
-//           }
-
+//         <StudentNavbar
+//           currentUser={user}
+//           onLogout={handleStudentLogout}
+//           onToggleSidebar={handleMenuClick}
 //         />
-
-
-//         {/* ==================================================
-//             CONTENT AREA
-//         ================================================== */}
 
 //         <main className="admin-content flex-grow-1 bg-light p-3 p-md-4">
 //           {children}
 //         </main>
-
 //       </div>
-
 //     </div>
 //   );
 // }
+
 
 
 
@@ -235,7 +72,6 @@ import { useNavigate } from "react-router-dom";
 
 import StudentSidebar from "../sidebar/StudentSidebar.jsx";
 import StudentNavbar from "../navbar/StudentNavbar.jsx";
-
 import { useAuth } from "../../context/AuthContext.jsx";
 
 import "./layout.css";
@@ -247,7 +83,6 @@ export default function StudentLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Student logout
   async function handleStudentLogout() {
     try {
       await logout();
@@ -258,7 +93,6 @@ export default function StudentLayout({ children }) {
     }
   }
 
-  // Preserve desktop and mobile sidebar behavior
   function handleMenuClick() {
     if (window.innerWidth < 992) {
       setMobileOpen((previous) => !previous);
@@ -268,30 +102,49 @@ export default function StudentLayout({ children }) {
   }
 
   return (
-    <div className="admin-layout d-flex min-vh-100 position-relative">
+    <div
+      className={`admin-layout ${
+        collapsed ? "sidebar-collapsed" : ""
+      } ${mobileOpen ? "mobile-sidebar-open" : ""}`}
+    >
+      {/* Sidebar */}
       <StudentSidebar
         collapsed={collapsed}
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
       />
 
+      {/* Main application area */}
       <div
-        className={`admin-main flex-grow-1 d-flex flex-column ${
+        className={`admin-main ${
           collapsed ? "main-collapsed" : ""
         }`}
       >
+        {/* Fixed navbar */}
         <StudentNavbar
           currentUser={user}
           onLogout={handleStudentLogout}
           onToggleSidebar={handleMenuClick}
         />
 
-        <main className="admin-content flex-grow-1 bg-light p-3 p-md-4">
-          {children}
+        {/* Independently scrollable dashboard */}
+        <main className="admin-content">
+          <div className="student-content-inner">
+            {children}
+          </div>
         </main>
       </div>
+
+      {/* Mobile sidebar backdrop */}
+      {mobileOpen && (
+        <button
+          type="button"
+          className="student-sidebar-backdrop"
+          aria-label="Close sidebar"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
     </div>
   );
 }
-
 

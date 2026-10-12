@@ -299,7 +299,7 @@ export default function Login() {
               {/* OAUTH BUTTONS */}
               <div className="row g-2">
                 <div className="col-6">
-                  <button
+                  {/* <button
                     type="button"
                     className="btn border text-dark w-100 py-2 d-flex align-items-center justify-content-center bg-white"
                     style={{
@@ -324,7 +324,7 @@ export default function Login() {
                   >
                     <i className="bi bi-microsoft text-primary me-2"></i>
                     Microsoft
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
