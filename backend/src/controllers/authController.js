@@ -11,574 +11,6 @@
 //   logoutUser,
 //   logoutAllSessions,
 //   getCurrentUser,
-//    requestForgotPasswordOtp,
-//   verifyForgotPasswordOtp,
-//   resetPassword,
-//   changePassword,
-// } from "../services/authService.js";
-
-// import {
-//   sendOtpEmail,
-// } from "../services/emailService.js";
-
-// import {
-//   refreshCookieOptions,
-// } from "../utils/cookieOptions.js";
-
-
-// // ======================================================
-// // REGISTER
-// // ======================================================
-
-// export async function register(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const {
-//       name,
-//       email,
-//       password,
-//     } = req.body;
-
-//     const user =
-//       await registerUser({
-//         name,
-//         email,
-//         password,
-//         role: "STUDENT",
-//       });
-
-//     const { otp } =
-//       await createOtp({
-//         email,
-//         purpose:
-//           "EMAIL_VERIFICATION",
-//       });
-
-//     await sendOtpEmail({
-//       email,
-//       otp,
-//       purpose:
-//         "EMAIL_VERIFICATION",
-//     });
-
-//     res.status(201).json({
-//       success: true,
-//       message:
-//         "Account created. Verification OTP sent.",
-//       data: user,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // LOGIN
-// // ======================================================
-
-// export async function login(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const {
-//       email,
-//       password,
-//     } = req.body;
-
-//     const result =
-//       await loginUser({
-//         email,
-//         password,
-//         userAgent:
-//           req.get("user-agent"),
-//         ipAddress:
-//           req.ip,
-//       });
-
-//     res.cookie(
-//       "refreshToken",
-//       result.refreshToken,
-//       refreshCookieOptions
-//     );
-
-//     res.status(200).json({
-//       success: true,
-//       message:
-//         "Login successful.",
-//       data: {
-//         user: result.user,
-//         accessToken:
-//           result.accessToken,
-//       },
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // REFRESH TOKEN
-// // ======================================================
-
-// export async function refreshToken(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const token =
-//       req.cookies.refreshToken;
-
-//     const result =
-//       await refreshAccessToken(
-//         token,
-//         req.get("user-agent"),
-//         req.ip
-//       );
-
-//     res.cookie(
-//       "refreshToken",
-//       result.refreshToken,
-//       refreshCookieOptions
-//     );
-
-//     res.status(200).json({
-//       success: true,
-//       message:
-//         "Token refreshed successfully.",
-//       data: {
-//         accessToken:
-//           result.accessToken,
-//         user: result.user,
-//       },
-//     });
-//   } catch (error) {
-//     res.clearCookie(
-//       "refreshToken",
-//       refreshCookieOptions
-//     );
-
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // LOGOUT
-// // ======================================================
-
-// export async function logout(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const token =
-//       req.cookies.refreshToken;
-
-//     await logoutUser(token);
-
-//     res.clearCookie(
-//       "refreshToken",
-//       refreshCookieOptions
-//     );
-
-//     res.status(200).json({
-//       success: true,
-//       message:
-//         "Logged out successfully.",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // LOGOUT ALL DEVICES
-// // ======================================================
-
-// export async function logoutAll(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     await logoutAllSessions(
-//       req.user.id
-//     );
-
-//     res.clearCookie(
-//       "refreshToken",
-//       refreshCookieOptions
-//     );
-
-//     res.status(200).json({
-//       success: true,
-//       message:
-//         "Logged out from all devices.",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // GET CURRENT USER
-// // ======================================================
-
-// export async function me(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const user =
-//       await getCurrentUser(
-//         req.user.id
-//       );
-
-//     res.status(200).json({
-//       success: true,
-//       data: {
-//         id: user._id,
-//         name: user.name,
-//         email: user.email,
-//         phone: user.phone,
-//         role: user.role,
-//         profileImage:
-//           user.profileImage,
-//         isEmailVerified:
-//           user.isEmailVerified,
-//         isActive:
-//           user.isActive,
-//         createdAt:
-//           user.createdAt,
-//       },
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // VERIFY EMAIL OTP
-// // ======================================================
-
-// export async function verifyEmailOtp(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const {
-//       email,
-//       otp,
-//     } = req.body;
-
-//     await verifyOtp({
-//       email,
-//       otp,
-//       purpose:
-//         "EMAIL_VERIFICATION",
-//     });
-
-//     const user =
-//       await User.findOneAndUpdate(
-//         {
-//           email:
-//             email.toLowerCase().trim(),
-//         },
-//         {
-//           $set: {
-//             isEmailVerified: true,
-//           },
-//         },
-//         {
-//           new: true,
-//         }
-//       );
-
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message:
-//           "User not found.",
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       message:
-//         "Email verified successfully.",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // RESEND EMAIL OTP
-// // ======================================================
-
-// export async function resendVerificationOtp(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const { email } =
-//       req.body;
-
-//     const user =
-//       await User.findOne({
-//         email:
-//           email.toLowerCase().trim(),
-//       });
-
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message:
-//           "User not found.",
-//       });
-//     }
-
-//     if (user.isEmailVerified) {
-//       return res.status(400).json({
-//         success: false,
-//         message:
-//           "Email is already verified.",
-//       });
-//     }
-
-//     const { otp } =
-//       await createOtp({
-//         email,
-//         purpose:
-//           "EMAIL_VERIFICATION",
-//       });
-
-//     await sendOtpEmail({
-//       email,
-//       otp,
-//       purpose:
-//         "EMAIL_VERIFICATION",
-//     });
-
-//     res.json({
-//       success: true,
-//       message:
-//         "Verification OTP resent.",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // REQUEST FORGOT PASSWORD OTP
-// // ======================================================
-
-// export async function forgotPassword(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const { email } =
-//       req.body;
-
-//     const result =
-//       await requestForgotPasswordOtp(
-//         email
-//       );
-
-//     /*
-//      * Always return the same response
-//      * whether email exists or not.
-//      *
-//      * This prevents email enumeration.
-//      */
-
-//     if (result.sent) {
-//       await sendOtpEmail({
-//         email:
-//           email.toLowerCase().trim(),
-//         otp: result.otp,
-//         purpose:
-//           "FORGOT_PASSWORD",
-//       });
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       message:
-//         "If an account exists for this email, a password reset OTP has been sent.",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-// // ======================================================
-// // VERIFY FORGOT PASSWORD OTP
-// // ======================================================
-
-// export async function verifyResetOtp(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const {
-//       email,
-//       otp,
-//     } = req.body;
-
-//     await verifyForgotPasswordOtp({
-//       email,
-//       otp,
-//     });
-
-//     res.status(200).json({
-//       success: true,
-//       message:
-//         "OTP verified successfully. You can now reset your password.",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // RESET PASSWORD
-// // ======================================================
-
-// export async function resetPasswordController(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const {
-//       email,
-//       newPassword,
-//     } = req.body;
-
-//     /*
-//      * Important:
-//      *
-//      * We verify that the latest OTP
-//      * has already been verified.
-//      */
-
-//     const otpRecord =
-//       await Otp.findOne({
-//         email:
-//           email.toLowerCase().trim(),
-
-//         purpose:
-//           "FORGOT_PASSWORD",
-
-//         verified: true,
-
-//         consumed: false,
-
-//       }).sort({
-//         createdAt: -1,
-//       });
-
-//     if (!otpRecord) {
-//       return res.status(400).json({
-//         success: false,
-//         message:
-//           "Please verify the password reset OTP first.",
-//       });
-//     }
-
-//    await resetPassword({
-//   email,
-//   newPassword,
-// });
-
-// otpRecord.consumed = true;
-// await otpRecord.save();
-
-//     res.status(200).json({
-//       success: true,
-//       message:
-//         "Password reset successfully. Please login again.",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// // ======================================================
-// // CHANGE PASSWORD
-// // ======================================================
-
-// export async function changePasswordController(
-//   req,
-//   res,
-//   next
-// ) {
-//   try {
-//     const {
-//       currentPassword,
-//       newPassword,
-//     } = req.body;
-
-//     await changePassword({
-//       userId:
-//         req.user.id,
-
-//       currentPassword,
-
-//       newPassword,
-//     });
-
-//     res.status(200).json({
-//       success: true,
-//       message:
-//         "Password changed successfully. Please login again.",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-
-
-
-
-// import User from "../models/User.js";
-// import Otp from "../models/Otp.js";
-
-// import {
-//   registerUser,
-//   loginUser,
-//   createOtp,
-//   verifyOtp,
-//   refreshAccessToken,
-//   logoutUser,
-//   logoutAllSessions,
-//   getCurrentUser,
 //   requestForgotPasswordOtp,
 //   verifyForgotPasswordOtp,
 //   resetPassword,
@@ -595,6 +27,8 @@
 // // ======================================================
 
 // export async function register(req, res, next) {
+//   let createdUser = null;
+
 //   try {
 //     // --------------------------------------------------
 //     // Get registration data
@@ -611,12 +45,23 @@
 
 
 //     // --------------------------------------------------
+//     // Normalize email
+//     // --------------------------------------------------
+
+//     const normalizedEmail =
+//       String(email || "")
+//         .trim()
+//         .toLowerCase();
+
+
+//     // --------------------------------------------------
 //     // Normalize role
 //     // --------------------------------------------------
 
-//     const normalizedRole = String(role || "")
-//       .trim()
-//       .toUpperCase();
+//     const normalizedRole =
+//       String(role || "")
+//         .trim()
+//         .toUpperCase();
 
 
 //     // --------------------------------------------------
@@ -645,7 +90,11 @@
 //     }
 
 
-//     if (!allowedRegistrationRoles.includes(normalizedRole)) {
+//     if (
+//       !allowedRegistrationRoles.includes(
+//         normalizedRole
+//       )
+//     ) {
 //       return res.status(400).json({
 //         success: false,
 //         message: "Invalid registration role.",
@@ -655,11 +104,14 @@
 
 //     // --------------------------------------------------
 //     // Register user
+//     //
+//     // registerUser() also validates email format
+//     // at service level.
 //     // --------------------------------------------------
 
-//     const user = await registerUser({
+//     createdUser = await registerUser({
 //       name,
-//       email,
+//       email: normalizedEmail,
 //       phone,
 //       address,
 //       password,
@@ -671,8 +123,8 @@
 //     // Create email verification OTP
 //     // --------------------------------------------------
 
-//     const { otp } = await createOtp({
-//       email,
+//     const otpResult = await createOtp({
+//       email: normalizedEmail,
 //       purpose: "EMAIL_VERIFICATION",
 //     });
 
@@ -681,23 +133,92 @@
 //     // Send email verification OTP
 //     // --------------------------------------------------
 
-//     await sendOtpEmail({
-//       email,
-//       otp,
-//       purpose: "EMAIL_VERIFICATION",
-//     });
+//     try {
+//       await sendOtpEmail({
+//         email: normalizedEmail,
+//         otp: otpResult.otp,
+//         purpose: "EMAIL_VERIFICATION",
+//       });
+//     } catch (emailError) {
+
+//       // ==================================================
+//       // EMAIL SENDING FAILED
+//       // ==================================================
+//       //
+//       // IMPORTANT:
+//       //
+//       // User was created before sending OTP.
+//       //
+//       // If SMTP rejects the recipient or email sending
+//       // fails, remove the newly created user and OTP.
+//       //
+//       // This prevents invalid registrations from staying
+//       // inside MongoDB.
+//       // ==================================================
+
+//       if (createdUser?.id) {
+//         await User.deleteOne({
+//           _id: createdUser.id,
+//         });
+//       }
+
+//       await Otp.deleteMany({
+//         email: normalizedEmail,
+//         purpose: "EMAIL_VERIFICATION",
+//         verified: false,
+//         consumed: false,
+//       });
+
+//       throw new Error(
+//         "Unable to send verification OTP. Please check your email address and try again."
+//       );
+//     }
 
 
 //     // --------------------------------------------------
 //     // Response
 //     // --------------------------------------------------
 
-//     res.status(201).json({
+//     return res.status(201).json({
 //       success: true,
-//       message: "Account created. Verification OTP sent.",
-//       data: user,
+
+//       message:
+//         "Account created. Verification OTP sent.",
+
+//       data: {
+//         email: normalizedEmail,
+
+//         expiresAt:
+//           otpResult.expiresAt,
+//       },
 //     });
+
 //   } catch (error) {
+
+//     // --------------------------------------------------
+//     // IMPORTANT CLEANUP
+//     //
+//     // This handles failures that happen AFTER the user
+//     // has been created but BEFORE registration succeeds.
+//     //
+//     // If sendOtpEmail() already handled cleanup,
+//     // deleting again is harmless because deleteOne()
+//     // simply affects zero documents.
+//     // --------------------------------------------------
+
+//     if (createdUser?.id) {
+//       try {
+//         await User.deleteOne({
+//           _id: createdUser.id,
+//         });
+//       } catch (cleanupError) {
+//         console.error(
+//           "Registration user cleanup failed:",
+//           cleanupError.message
+//         );
+//       }
+//     }
+
 //     next(error);
 //   }
 // }
@@ -744,12 +265,18 @@
 
 //     res.status(200).json({
 //       success: true,
-//       message: "Login successful.",
+
+//       message:
+//         "Login successful.",
+
 //       data: {
 //         user: result.user,
-//         accessToken: result.accessToken,
+
+//         accessToken:
+//           result.accessToken,
 //       },
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
@@ -760,24 +287,31 @@
 // // REFRESH TOKEN
 // // ======================================================
 
-// export async function refreshToken(req, res, next) {
+// export async function refreshToken(
+//   req,
+//   res,
+//   next
+// ) {
 //   try {
+
 //     // --------------------------------------------------
 //     // Get refresh token from cookie
 //     // --------------------------------------------------
 
-//     const token = req.cookies.refreshToken;
+//     const token =
+//       req.cookies.refreshToken;
 
 
 //     // --------------------------------------------------
 //     // Generate new access token
 //     // --------------------------------------------------
 
-//     const result = await refreshAccessToken(
-//       token,
-//       req.get("user-agent"),
-//       req.ip
-//     );
+//     const result =
+//       await refreshAccessToken(
+//         token,
+//         req.get("user-agent"),
+//         req.ip
+//       );
 
 
 //     // --------------------------------------------------
@@ -797,13 +331,21 @@
 
 //     res.status(200).json({
 //       success: true,
-//       message: "Token refreshed successfully.",
+
+//       message:
+//         "Token refreshed successfully.",
+
 //       data: {
-//         accessToken: result.accessToken,
-//         user: result.user,
+//         accessToken:
+//           result.accessToken,
+
+//         user:
+//           result.user,
 //       },
 //     });
+
 //   } catch (error) {
+
 //     // --------------------------------------------------
 //     // Clear invalid refresh token
 //     // --------------------------------------------------
@@ -822,13 +364,19 @@
 // // LOGOUT
 // // ======================================================
 
-// export async function logout(req, res, next) {
+// export async function logout(
+//   req,
+//   res,
+//   next
+// ) {
 //   try {
+
 //     // --------------------------------------------------
 //     // Get refresh token
 //     // --------------------------------------------------
 
-//     const token = req.cookies.refreshToken;
+//     const token =
+//       req.cookies.refreshToken;
 
 
 //     // --------------------------------------------------
@@ -854,8 +402,11 @@
 
 //     res.status(200).json({
 //       success: true,
-//       message: "Logged out successfully.",
+
+//       message:
+//         "Logged out successfully.",
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
@@ -866,13 +417,20 @@
 // // LOGOUT ALL DEVICES
 // // ======================================================
 
-// export async function logoutAll(req, res, next) {
+// export async function logoutAll(
+//   req,
+//   res,
+//   next
+// ) {
 //   try {
+
 //     // --------------------------------------------------
 //     // Logout all sessions
 //     // --------------------------------------------------
 
-//     await logoutAllSessions(req.user.id);
+//     await logoutAllSessions(
+//       req.user.id
+//     );
 
 
 //     // --------------------------------------------------
@@ -891,8 +449,11 @@
 
 //     res.status(200).json({
 //       success: true,
-//       message: "Logged out from all devices.",
+
+//       message:
+//         "Logged out from all devices.",
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
@@ -903,13 +464,21 @@
 // // GET CURRENT USER
 // // ======================================================
 
-// export async function me(req, res, next) {
+// export async function me(
+//   req,
+//   res,
+//   next
+// ) {
 //   try {
+
 //     // --------------------------------------------------
 //     // Get current user
 //     // --------------------------------------------------
 
-//     const user = await getCurrentUser(req.user.id);
+//     const user =
+//       await getCurrentUser(
+//         req.user.id
+//       );
 
 
 //     // --------------------------------------------------
@@ -920,29 +489,41 @@
 //       success: true,
 
 //       data: {
-//         id: user._id,
+//         id:
+//           user._id,
 
-//         name: user.name,
+//         name:
+//           user.name,
 
-//         email: user.email,
+//         email:
+//           user.email,
 
-//         phone: user.phone,
+//         phone:
+//           user.phone,
 
-//         address: user.address,
+//         address:
+//           user.address,
 
-//         role: user.role,
+//         role:
+//           user.role,
 
-//         profileImage: user.profileImage,
+//         profileImage:
+//           user.profileImage,
 
-//         isEmailVerified: user.isEmailVerified,
+//         isEmailVerified:
+//           user.isEmailVerified,
 
-//         isActive: user.isActive,
+//         isActive:
+//           user.isActive,
 
-//         isSuspended: user.isSuspended,
+//         isSuspended:
+//           user.isSuspended,
 
-//         createdAt: user.createdAt,
+//         createdAt:
+//           user.createdAt,
 //       },
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
@@ -953,7 +534,11 @@
 // // VERIFY EMAIL OTP
 // // ======================================================
 
-// export async function verifyEmailOtp(req, res, next) {
+// export async function verifyEmailOtp(
+//   req,
+//   res,
+//   next
+// ) {
 //   try {
 //     const {
 //       email,
@@ -962,13 +547,26 @@
 
 
 //     // --------------------------------------------------
+//     // Normalize email
+//     // --------------------------------------------------
+
+//     const normalizedEmail =
+//       String(email || "")
+//         .trim()
+//         .toLowerCase();
+
+
+//     // --------------------------------------------------
 //     // Verify OTP
 //     // --------------------------------------------------
 
 //     await verifyOtp({
-//       email,
+//       email: normalizedEmail,
+
 //       otp,
-//       purpose: "EMAIL_VERIFICATION",
+
+//       purpose:
+//         "EMAIL_VERIFICATION",
 //     });
 
 
@@ -976,21 +574,24 @@
 //     // Mark email as verified
 //     // --------------------------------------------------
 
-//     const user = await User.findOneAndUpdate(
-//       {
-//         email: email.toLowerCase().trim(),
-//       },
-
-//       {
-//         $set: {
-//           isEmailVerified: true,
+//     const user =
+//       await User.findOneAndUpdate(
+//         {
+//           email:
+//             normalizedEmail,
 //         },
-//       },
 
-//       {
-//         new: true,
-//       }
-//     );
+//         {
+//           $set: {
+//             isEmailVerified:
+//               true,
+//           },
+//         },
+
+//         {
+//           new: true,
+//         }
+//       );
 
 
 //     // --------------------------------------------------
@@ -1000,19 +601,55 @@
 //     if (!user) {
 //       return res.status(404).json({
 //         success: false,
-//         message: "User not found.",
+
+//         message:
+//           "User not found.",
 //       });
 //     }
+
+
+//     // --------------------------------------------------
+//     // Consume email verification OTP
+//     //
+//     // We consume it after successful verification.
+//     // This prevents the same OTP from being reused.
+//     // --------------------------------------------------
+
+//     await Otp.updateMany(
+//       {
+//         email:
+//           normalizedEmail,
+
+//         purpose:
+//           "EMAIL_VERIFICATION",
+
+//         verified:
+//           true,
+
+//         consumed:
+//           false,
+//       },
+
+//       {
+//         $set: {
+//           consumed:
+//             true,
+//         },
+//       }
+//     );
 
 
 //     // --------------------------------------------------
 //     // Response
 //     // --------------------------------------------------
 
-//     res.json({
+//     return res.status(200).json({
 //       success: true,
-//       message: "Email verified successfully.",
+
+//       message:
+//         "Email verified successfully.",
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
@@ -1029,16 +666,30 @@
 //   next
 // ) {
 //   try {
-//     const { email } = req.body;
+//     const {
+//       email,
+//     } = req.body;
+
+
+//     // --------------------------------------------------
+//     // Normalize email
+//     // --------------------------------------------------
+
+//     const normalizedEmail =
+//       String(email || "")
+//         .trim()
+//         .toLowerCase();
 
 
 //     // --------------------------------------------------
 //     // Find user
 //     // --------------------------------------------------
 
-//     const user = await User.findOne({
-//       email: email.toLowerCase().trim(),
-//     });
+//     const user =
+//       await User.findOne({
+//         email:
+//           normalizedEmail,
+//       });
 
 
 //     // --------------------------------------------------
@@ -1048,7 +699,9 @@
 //     if (!user) {
 //       return res.status(404).json({
 //         success: false,
-//         message: "User not found.",
+
+//         message:
+//           "User not found.",
 //       });
 //     }
 
@@ -1060,7 +713,9 @@
 //     if (user.isEmailVerified) {
 //       return res.status(400).json({
 //         success: false,
-//         message: "Email is already verified.",
+
+//         message:
+//           "Email is already verified.",
 //       });
 //     }
 
@@ -1069,31 +724,68 @@
 //     // Create new OTP
 //     // --------------------------------------------------
 
-//     const { otp } = await createOtp({
-//       email,
-//       purpose: "EMAIL_VERIFICATION",
-//     });
+//     const otpResult =
+//       await createOtp({
+//         email:
+//           normalizedEmail,
+
+//         purpose:
+//           "EMAIL_VERIFICATION",
+//       });
 
 
 //     // --------------------------------------------------
 //     // Send OTP
 //     // --------------------------------------------------
 
-//     await sendOtpEmail({
-//       email,
-//       otp,
-//       purpose: "EMAIL_VERIFICATION",
-//     });
+//     try {
+
+//       await sendOtpEmail({
+//         email:
+//           normalizedEmail,
+
+//         otp:
+//           otpResult.otp,
+
+//         purpose:
+//           "EMAIL_VERIFICATION",
+//       });
+
+//     } catch (emailError) {
+
+//       // ------------------------------------------------
+//       // Remove failed OTP
+//       // ------------------------------------------------
+
+//       await Otp.deleteMany({
+//         email:
+//           normalizedEmail,
+
+//         purpose:
+//           "EMAIL_VERIFICATION",
+
+//         verified:
+//           false,
+
+//         consumed:
+//           false,
+//       });
+
+//       throw emailError;
+//     }
 
 
 //     // --------------------------------------------------
 //     // Response
 //     // --------------------------------------------------
 
-//     res.json({
+//     return res.status(200).json({
 //       success: true,
-//       message: "Verification OTP resent.",
+
+//       message:
+//         "Verification OTP resent.",
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
@@ -1104,18 +796,25 @@
 // // REQUEST FORGOT PASSWORD OTP
 // // ======================================================
 
-// export async function forgotPassword(req, res, next) {
+// export async function forgotPassword(
+//   req,
+//   res,
+//   next
+// ) {
 //   try {
-//     const { email } = req.body;
+//     const {
+//       email,
+//     } = req.body;
 
 
 //     // --------------------------------------------------
 //     // Request forgot password OTP
 //     // --------------------------------------------------
 
-//     const result = await requestForgotPasswordOtp(
-//       email
-//     );
+//     const result =
+//       await requestForgotPasswordOtp(
+//         email
+//       );
 
 
 //     /*
@@ -1131,10 +830,16 @@
 //     // --------------------------------------------------
 
 //     if (result.sent) {
+
 //       await sendOtpEmail({
-//         email: email.toLowerCase().trim(),
-//         otp: result.otp,
-//         purpose: "FORGOT_PASSWORD",
+//         email:
+//           email.toLowerCase().trim(),
+
+//         otp:
+//           result.otp,
+
+//         purpose:
+//           "FORGOT_PASSWORD",
 //       });
 //     }
 
@@ -1145,9 +850,11 @@
 
 //     res.status(200).json({
 //       success: true,
+
 //       message:
 //         "If an account exists for this email, a password reset OTP has been sent.",
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
@@ -1158,7 +865,11 @@
 // // VERIFY FORGOT PASSWORD OTP
 // // ======================================================
 
-// export async function verifyResetOtp(req, res, next) {
+// export async function verifyResetOtp(
+//   req,
+//   res,
+//   next
+// ) {
 //   try {
 //     const {
 //       email,
@@ -1172,6 +883,7 @@
 
 //     await verifyForgotPasswordOtp({
 //       email,
+
 //       otp,
 //     });
 
@@ -1182,9 +894,11 @@
 
 //     res.status(200).json({
 //       success: true,
+
 //       message:
 //         "OTP verified successfully. You can now reset your password.",
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
@@ -1216,20 +930,36 @@
 
 
 //     // --------------------------------------------------
+//     // Normalize email
+//     // --------------------------------------------------
+
+//     const normalizedEmail =
+//       String(email || "")
+//         .trim()
+//         .toLowerCase();
+
+
+//     // --------------------------------------------------
 //     // Find verified OTP
 //     // --------------------------------------------------
 
-//     const otpRecord = await Otp.findOne({
-//       email: email.toLowerCase().trim(),
+//     const otpRecord =
+//       await Otp.findOne({
+//         email:
+//           normalizedEmail,
 
-//       purpose: "FORGOT_PASSWORD",
+//         purpose:
+//           "FORGOT_PASSWORD",
 
-//       verified: true,
+//         verified:
+//           true,
 
-//       consumed: false,
-//     }).sort({
-//       createdAt: -1,
-//     });
+//         consumed:
+//           false,
+//       }).sort({
+//         createdAt:
+//           -1,
+//       });
 
 
 //     // --------------------------------------------------
@@ -1239,6 +969,7 @@
 //     if (!otpRecord) {
 //       return res.status(400).json({
 //         success: false,
+
 //         message:
 //           "Please verify the password reset OTP first.",
 //       });
@@ -1250,7 +981,9 @@
 //     // --------------------------------------------------
 
 //     await resetPassword({
-//       email,
+//       email:
+//         normalizedEmail,
+
 //       newPassword,
 //     });
 
@@ -1259,7 +992,8 @@
 //     // Consume OTP
 //     // --------------------------------------------------
 
-//     otpRecord.consumed = true;
+//     otpRecord.consumed =
+//       true;
 
 //     await otpRecord.save();
 
@@ -1270,9 +1004,11 @@
 
 //     res.status(200).json({
 //       success: true,
+
 //       message:
 //         "Password reset successfully. Please login again.",
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
@@ -1300,8 +1036,11 @@
 //     // --------------------------------------------------
 
 //     await changePassword({
-//       userId: req.user.id,
+//       userId:
+//         req.user.id,
+
 //       currentPassword,
+
 //       newPassword,
 //     });
 
@@ -1312,13 +1051,16 @@
 
 //     res.status(200).json({
 //       success: true,
+
 //       message:
 //         "Password changed successfully. Please login again.",
 //     });
+
 //   } catch (error) {
 //     next(error);
 //   }
 // }
+
 
 
 
@@ -1344,6 +1086,72 @@ import { sendOtpEmail } from "../services/emailService.js";
 
 import { refreshCookieOptions } from "../utils/cookieOptions.js";
 
+// ======================================================
+// COMMON HELPERS
+// ======================================================
+
+// Normalize and validate email format.
+
+function normalizeAndValidateEmail(email) {
+  if (
+    !email ||
+    typeof email !== "string" ||
+    !email.trim()
+  ) {
+    throw new Error("Email address is required.");
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const emailRegex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (
+    !emailRegex.test(normalizedEmail) ||
+    normalizedEmail.length > 254
+  ) {
+    throw new Error(
+      "Please enter a valid email address."
+    );
+  }
+
+  return normalizedEmail;
+}
+
+// Get user ID regardless of safe response format.
+
+function getCreatedUserId(user) {
+  return user?.id || user?._id || null;
+}
+
+// Remove only the OTP created by the current registration.
+
+async function cleanupRegistrationOtp(otpResult, email) {
+  try {
+    const otpId = otpResult?.otpId || otpResult?._id;
+
+    if (otpId) {
+      await Otp.deleteOne({ _id: otpId });
+      return;
+    }
+
+    // Fallback for services that do not return otpId.
+    // Only remove unused email-verification OTP records.
+    if (email) {
+      await Otp.deleteMany({
+        email,
+        purpose: "EMAIL_VERIFICATION",
+        verified: false,
+        consumed: false,
+      });
+    }
+  } catch (error) {
+    console.error(
+      "Registration OTP cleanup failed:",
+      error.message
+    );
+  }
+}
 
 // ======================================================
 // REGISTER
@@ -1351,6 +1159,7 @@ import { refreshCookieOptions } from "../utils/cookieOptions.js";
 
 export async function register(req, res, next) {
   let createdUser = null;
+  let otpResult = null;
 
   try {
     // --------------------------------------------------
@@ -1364,46 +1173,36 @@ export async function register(req, res, next) {
       address,
       password,
       role,
+
+      // Student academic details
+      studentCategory,
+      educationLevel,
+      courseName,
+      branch,
+      collegeName,
     } = req.body;
 
-
     // --------------------------------------------------
-    // Normalize email
+    // Validate and normalize email
     // --------------------------------------------------
 
     const normalizedEmail =
-      String(email || "")
-        .trim()
-        .toLowerCase();
-
+      normalizeAndValidateEmail(email);
 
     // --------------------------------------------------
     // Normalize role
     // --------------------------------------------------
 
-    const normalizedRole =
-      String(role || "")
-        .trim()
-        .toUpperCase();
+    const normalizedRole = String(role || "")
+      .trim()
+      .toUpperCase();
 
-
-    // --------------------------------------------------
-    // Allowed roles for registration
-    //
-    // SUPER_ADMIN is intentionally not allowed from
-    // public registration.
-    // --------------------------------------------------
-
+    // SUPER_ADMIN is not allowed in public registration.
     const allowedRegistrationRoles = [
       "STUDENT",
       "INSTRUCTOR",
       "ADMIN",
     ];
-
-
-    // --------------------------------------------------
-    // Validate role
-    // --------------------------------------------------
 
     if (!normalizedRole) {
       return res.status(400).json({
@@ -1411,7 +1210,6 @@ export async function register(req, res, next) {
         message: "Role is required.",
       });
     }
-
 
     if (
       !allowedRegistrationRoles.includes(
@@ -1424,12 +1222,8 @@ export async function register(req, res, next) {
       });
     }
 
-
     // --------------------------------------------------
     // Register user
-    //
-    // registerUser() also validates email format
-    // at service level.
     // --------------------------------------------------
 
     createdUser = await registerUser({
@@ -1439,100 +1233,68 @@ export async function register(req, res, next) {
       address,
       password,
       role: normalizedRole,
-    });
 
+      // Pass new academic fields to service
+      studentCategory,
+      educationLevel,
+      courseName,
+      branch,
+      collegeName,
+    });
 
     // --------------------------------------------------
     // Create email verification OTP
     // --------------------------------------------------
 
-    const otpResult = await createOtp({
+    otpResult = await createOtp({
       email: normalizedEmail,
       purpose: "EMAIL_VERIFICATION",
     });
 
-
-    // --------------------------------------------------
-    // Send email verification OTP
-    // --------------------------------------------------
-
-    try {
-      await sendOtpEmail({
-        email: normalizedEmail,
-        otp: otpResult.otp,
-        purpose: "EMAIL_VERIFICATION",
-      });
-    } catch (emailError) {
-
-      // ==================================================
-      // EMAIL SENDING FAILED
-      // ==================================================
-      //
-      // IMPORTANT:
-      //
-      // User was created before sending OTP.
-      //
-      // If SMTP rejects the recipient or email sending
-      // fails, remove the newly created user and OTP.
-      //
-      // This prevents invalid registrations from staying
-      // inside MongoDB.
-      // ==================================================
-
-      if (createdUser?.id) {
-        await User.deleteOne({
-          _id: createdUser.id,
-        });
-      }
-
-      await Otp.deleteMany({
-        email: normalizedEmail,
-        purpose: "EMAIL_VERIFICATION",
-        verified: false,
-        consumed: false,
-      });
-
+    if (!otpResult?.otp) {
       throw new Error(
-        "Unable to send verification OTP. Please check your email address and try again."
+        "Unable to generate verification OTP. Please try again."
       );
     }
 
+    // --------------------------------------------------
+    // Send verification OTP to user's email
+    // --------------------------------------------------
+
+    await sendOtpEmail({
+      email: normalizedEmail,
+      otp: otpResult.otp,
+      purpose: "EMAIL_VERIFICATION",
+    });
 
     // --------------------------------------------------
-    // Response
+    // Successful registration response
     // --------------------------------------------------
 
     return res.status(201).json({
       success: true,
-
       message:
         "Account created. Verification OTP sent.",
 
       data: {
         email: normalizedEmail,
-
-        expiresAt:
-          otpResult.expiresAt,
+        expiresAt: otpResult.expiresAt,
       },
     });
-
   } catch (error) {
-
     // --------------------------------------------------
-    // IMPORTANT CLEANUP
-    //
-    // This handles failures that happen AFTER the user
-    // has been created but BEFORE registration succeeds.
-    //
-    // If sendOtpEmail() already handled cleanup,
-    // deleting again is harmless because deleteOne()
-    // simply affects zero documents.
+    // REGISTRATION FAILURE CLEANUP
     // --------------------------------------------------
 
-    if (createdUser?.id) {
+    // If OTP creation or email sending fails,
+    // remove the newly created user.
+
+    const userId = getCreatedUserId(createdUser);
+
+    if (userId) {
       try {
         await User.deleteOne({
-          _id: createdUser.id,
+          _id: userId,
         });
       } catch (cleanupError) {
         console.error(
@@ -1542,10 +1304,18 @@ export async function register(req, res, next) {
       }
     }
 
-    next(error);
+    // Remove the OTP created by this registration.
+
+    if (otpResult) {
+      await cleanupRegistrationOtp(
+        otpResult,
+        createdUser?.email
+      );
+    }
+
+    return next(error);
   }
 }
-
 
 // ======================================================
 // LOGIN
@@ -1558,18 +1328,23 @@ export async function login(req, res, next) {
       password,
     } = req.body;
 
+    // --------------------------------------------------
+    // Validate email format
+    // --------------------------------------------------
+
+    const normalizedEmail =
+      normalizeAndValidateEmail(email);
 
     // --------------------------------------------------
     // Login user
     // --------------------------------------------------
 
     const result = await loginUser({
-      email,
+      email: normalizedEmail,
       password,
       userAgent: req.get("user-agent"),
       ipAddress: req.ip,
     });
-
 
     // --------------------------------------------------
     // Store refresh token in HTTP-only cookie
@@ -1581,65 +1356,50 @@ export async function login(req, res, next) {
       refreshCookieOptions
     );
 
-
     // --------------------------------------------------
     // Response
     // --------------------------------------------------
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
-      message:
-        "Login successful.",
+      message: "Login successful.",
 
       data: {
         user: result.user,
-
-        accessToken:
-          result.accessToken,
+        accessToken: result.accessToken,
       },
     });
-
   } catch (error) {
     next(error);
   }
 }
 
-
 // ======================================================
 // REFRESH TOKEN
 // ======================================================
 
-export async function refreshToken(
-  req,
-  res,
-  next
-) {
+export async function refreshToken(req, res, next) {
   try {
+    // Get refresh token from cookie.
 
-    // --------------------------------------------------
-    // Get refresh token from cookie
-    // --------------------------------------------------
+    const token = req.cookies?.refreshToken;
 
-    const token =
-      req.cookies.refreshToken;
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token is missing.",
+      });
+    }
 
+    // Generate new access token and refresh token.
 
-    // --------------------------------------------------
-    // Generate new access token
-    // --------------------------------------------------
+    const result = await refreshAccessToken(
+      token,
+      req.get("user-agent"),
+      req.ip
+    );
 
-    const result =
-      await refreshAccessToken(
-        token,
-        req.get("user-agent"),
-        req.ip
-      );
-
-
-    // --------------------------------------------------
-    // Rotate refresh token
-    // --------------------------------------------------
+    // Rotate refresh token cookie.
 
     res.cookie(
       "refreshToken",
@@ -1647,32 +1407,16 @@ export async function refreshToken(
       refreshCookieOptions
     );
 
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
-      message:
-        "Token refreshed successfully.",
+      message: "Token refreshed successfully.",
 
       data: {
-        accessToken:
-          result.accessToken,
-
-        user:
-          result.user,
+        accessToken: result.accessToken,
+        user: result.user,
       },
     });
-
   } catch (error) {
-
-    // --------------------------------------------------
-    // Clear invalid refresh token
-    // --------------------------------------------------
-
     res.clearCookie(
       "refreshToken",
       refreshCookieOptions
@@ -1681,203 +1425,111 @@ export async function refreshToken(
     next(error);
   }
 }
-
 
 // ======================================================
 // LOGOUT
 // ======================================================
 
-export async function logout(
-  req,
-  res,
-  next
-) {
+export async function logout(req, res, next) {
   try {
-
-    // --------------------------------------------------
-    // Get refresh token
-    // --------------------------------------------------
-
-    const token =
-      req.cookies.refreshToken;
-
-
-    // --------------------------------------------------
-    // Logout current session
-    // --------------------------------------------------
+    const token = req.cookies?.refreshToken;
 
     await logoutUser(token);
-
-
-    // --------------------------------------------------
-    // Clear refresh token cookie
-    // --------------------------------------------------
 
     res.clearCookie(
       "refreshToken",
       refreshCookieOptions
     );
 
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
-      message:
-        "Logged out successfully.",
+      message: "Logged out successfully.",
     });
-
   } catch (error) {
     next(error);
   }
 }
-
 
 // ======================================================
 // LOGOUT ALL DEVICES
 // ======================================================
 
-export async function logoutAll(
-  req,
-  res,
-  next
-) {
+export async function logoutAll(req, res, next) {
   try {
-
-    // --------------------------------------------------
-    // Logout all sessions
-    // --------------------------------------------------
-
-    await logoutAllSessions(
-      req.user.id
-    );
-
-
-    // --------------------------------------------------
-    // Clear current refresh token
-    // --------------------------------------------------
+    await logoutAllSessions(req.user.id);
 
     res.clearCookie(
       "refreshToken",
       refreshCookieOptions
     );
 
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
-      message:
-        "Logged out from all devices.",
+      message: "Logged out from all devices.",
     });
-
   } catch (error) {
     next(error);
   }
 }
-
 
 // ======================================================
 // GET CURRENT USER
 // ======================================================
 
-export async function me(
-  req,
-  res,
-  next
-) {
+export async function me(req, res, next) {
   try {
+    const user = await getCurrentUser(req.user.id);
 
-    // --------------------------------------------------
-    // Get current user
-    // --------------------------------------------------
-
-    const user =
-      await getCurrentUser(
-        req.user.id
-      );
-
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
 
       data: {
-        id:
-          user._id,
+        id: user._id,
 
-        name:
-          user.name,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
 
-        email:
-          user.email,
+        // Student academic details
+        studentCategory: user.studentCategory || null,
+        educationLevel: user.educationLevel || null,
+        courseName: user.courseName || null,
+        branch: user.branch || null,
+        collegeName: user.collegeName || null,
 
-        phone:
-          user.phone,
+        role: user.role,
+        profileImage: user.profileImage,
 
-        address:
-          user.address,
+        isEmailVerified: user.isEmailVerified,
+        isActive: user.isActive,
+        isSuspended: user.isSuspended,
 
-        role:
-          user.role,
-
-        profileImage:
-          user.profileImage,
-
-        isEmailVerified:
-          user.isEmailVerified,
-
-        isActive:
-          user.isActive,
-
-        isSuspended:
-          user.isSuspended,
-
-        createdAt:
-          user.createdAt,
+        createdAt: user.createdAt,
       },
     });
-
   } catch (error) {
     next(error);
   }
 }
 
-
 // ======================================================
 // VERIFY EMAIL OTP
 // ======================================================
 
-export async function verifyEmailOtp(
-  req,
-  res,
-  next
-) {
+export async function verifyEmailOtp(req, res, next) {
   try {
     const {
       email,
       otp,
     } = req.body;
 
-
     // --------------------------------------------------
-    // Normalize email
+    // Validate email
     // --------------------------------------------------
 
     const normalizedEmail =
-      String(email || "")
-        .trim()
-        .toLowerCase();
-
+      normalizeAndValidateEmail(email);
 
     // --------------------------------------------------
     // Verify OTP
@@ -1885,99 +1537,75 @@ export async function verifyEmailOtp(
 
     await verifyOtp({
       email: normalizedEmail,
-
       otp,
-
-      purpose:
-        "EMAIL_VERIFICATION",
+      purpose: "EMAIL_VERIFICATION",
     });
-
 
     // --------------------------------------------------
     // Mark email as verified
     // --------------------------------------------------
 
-    const user =
-      await User.findOneAndUpdate(
-        {
-          email:
-            normalizedEmail,
+    const user = await User.findOneAndUpdate(
+      {
+        email: normalizedEmail,
+        isEmailVerified: false,
+      },
+      {
+        $set: {
+          isEmailVerified: true,
         },
-
-        {
-          $set: {
-            isEmailVerified:
-              true,
-          },
-        },
-
-        {
-          new: true,
-        }
-      );
-
-
-    // --------------------------------------------------
-    // User not found
-    // --------------------------------------------------
+      },
+      {
+        new: true,
+      }
+    );
 
     if (!user) {
+      // Check whether the account was already verified.
+
+      const existingUser = await User.findOne({
+        email: normalizedEmail,
+      });
+
+      if (existingUser?.isEmailVerified) {
+        return res.status(400).json({
+          success: false,
+          message: "Email is already verified.",
+        });
+      }
+
       return res.status(404).json({
         success: false,
-
-        message:
-          "User not found.",
+        message: "User not found.",
       });
     }
 
-
     // --------------------------------------------------
-    // Consume email verification OTP
-    //
-    // We consume it after successful verification.
-    // This prevents the same OTP from being reused.
+    // Consume verified OTP
     // --------------------------------------------------
 
     await Otp.updateMany(
       {
-        email:
-          normalizedEmail,
-
-        purpose:
-          "EMAIL_VERIFICATION",
-
-        verified:
-          true,
-
-        consumed:
-          false,
+        email: normalizedEmail,
+        purpose: "EMAIL_VERIFICATION",
+        verified: true,
+        consumed: false,
       },
-
       {
         $set: {
-          consumed:
-            true,
+          consumed: true,
         },
       }
     );
 
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
-
     return res.status(200).json({
       success: true,
-
-      message:
-        "Email verified successfully.",
+      message: "Email verified successfully.",
     });
-
   } catch (error) {
     next(error);
   }
 }
-
 
 // ======================================================
 // RESEND EMAIL OTP
@@ -1989,244 +1617,164 @@ export async function resendVerificationOtp(
   next
 ) {
   try {
-    const {
-      email,
-    } = req.body;
-
+    const { email } = req.body;
 
     // --------------------------------------------------
-    // Normalize email
+    // Validate email
     // --------------------------------------------------
 
     const normalizedEmail =
-      String(email || "")
-        .trim()
-        .toLowerCase();
-
+      normalizeAndValidateEmail(email);
 
     // --------------------------------------------------
     // Find user
     // --------------------------------------------------
 
-    const user =
-      await User.findOne({
-        email:
-          normalizedEmail,
-      });
-
-
-    // --------------------------------------------------
-    // User not found
-    // --------------------------------------------------
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-
-        message:
-          "User not found.",
+        message: "User not found.",
       });
     }
 
-
     // --------------------------------------------------
-    // Check email verification
+    // Check verification status
     // --------------------------------------------------
 
     if (user.isEmailVerified) {
       return res.status(400).json({
         success: false,
-
-        message:
-          "Email is already verified.",
+        message: "Email is already verified.",
       });
     }
-
 
     // --------------------------------------------------
     // Create new OTP
     // --------------------------------------------------
 
-    const otpResult =
-      await createOtp({
-        email:
-          normalizedEmail,
-
-        purpose:
-          "EMAIL_VERIFICATION",
-      });
-
+    const otpResult = await createOtp({
+      email: normalizedEmail,
+      purpose: "EMAIL_VERIFICATION",
+    });
 
     // --------------------------------------------------
     // Send OTP
     // --------------------------------------------------
 
     try {
-
       await sendOtpEmail({
-        email:
-          normalizedEmail,
-
-        otp:
-          otpResult.otp,
-
-        purpose:
-          "EMAIL_VERIFICATION",
+        email: normalizedEmail,
+        otp: otpResult.otp,
+        purpose: "EMAIL_VERIFICATION",
       });
-
     } catch (emailError) {
+      await cleanupRegistrationOtp(
+        otpResult,
+        normalizedEmail
+      );
 
-      // ------------------------------------------------
-      // Remove failed OTP
-      // ------------------------------------------------
-
-      await Otp.deleteMany({
-        email:
-          normalizedEmail,
-
-        purpose:
-          "EMAIL_VERIFICATION",
-
-        verified:
-          false,
-
-        consumed:
-          false,
-      });
-
-      throw emailError;
+      throw new Error(
+        "Unable to resend verification OTP. Please check your email address and try again."
+      );
     }
-
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
 
     return res.status(200).json({
       success: true,
-
-      message:
-        "Verification OTP resent.",
+      message: "Verification OTP resent.",
     });
-
   } catch (error) {
     next(error);
   }
 }
-
 
 // ======================================================
 // REQUEST FORGOT PASSWORD OTP
 // ======================================================
 
-export async function forgotPassword(
-  req,
-  res,
-  next
-) {
+export async function forgotPassword(req, res, next) {
   try {
-    const {
-      email,
-    } = req.body;
+    const { email } = req.body;
 
+    const normalizedEmail =
+      normalizeAndValidateEmail(email);
 
     // --------------------------------------------------
     // Request forgot password OTP
     // --------------------------------------------------
 
-    const result =
-      await requestForgotPasswordOtp(
-        email
-      );
-
-
-    /*
-     * Always return the same response
-     * whether email exists or not.
-     *
-     * This prevents email enumeration.
-     */
-
+    const result = await requestForgotPasswordOtp(
+      normalizedEmail
+    );
 
     // --------------------------------------------------
-    // Send OTP only when account exists
+    // Keep response generic to prevent email enumeration
     // --------------------------------------------------
 
     if (result.sent) {
+      try {
+        await sendOtpEmail({
+          email: normalizedEmail,
+          otp: result.otp,
+          purpose: "FORGOT_PASSWORD",
+        });
+      } catch (emailError) {
+        // Remove unused forgot-password OTP if sending fails.
 
-      await sendOtpEmail({
-        email:
-          email.toLowerCase().trim(),
+        await Otp.deleteMany({
+          email: normalizedEmail,
+          purpose: "FORGOT_PASSWORD",
+          verified: false,
+          consumed: false,
+        });
 
-        otp:
-          result.otp,
-
-        purpose:
-          "FORGOT_PASSWORD",
-      });
+        throw new Error(
+          "Unable to send password reset OTP. Please try again."
+        );
+      }
     }
 
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
       message:
         "If an account exists for this email, a password reset OTP has been sent.",
     });
-
   } catch (error) {
     next(error);
   }
 }
 
-
 // ======================================================
 // VERIFY FORGOT PASSWORD OTP
 // ======================================================
 
-export async function verifyResetOtp(
-  req,
-  res,
-  next
-) {
+export async function verifyResetOtp(req, res, next) {
   try {
     const {
       email,
       otp,
     } = req.body;
 
-
-    // --------------------------------------------------
-    // Verify forgot password OTP
-    // --------------------------------------------------
+    const normalizedEmail =
+      normalizeAndValidateEmail(email);
 
     await verifyForgotPasswordOtp({
-      email,
-
+      email: normalizedEmail,
       otp,
     });
 
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
       message:
         "OTP verified successfully. You can now reset your password.",
     });
-
   } catch (error) {
     next(error);
   }
 }
-
 
 // ======================================================
 // RESET PASSWORD
@@ -2243,100 +1791,57 @@ export async function resetPasswordController(
       newPassword,
     } = req.body;
 
-
-    /*
-     * Important:
-     *
-     * We verify that the latest OTP
-     * has already been verified.
-     */
-
-
-    // --------------------------------------------------
-    // Normalize email
-    // --------------------------------------------------
-
     const normalizedEmail =
-      String(email || "")
-        .trim()
-        .toLowerCase();
-
+      normalizeAndValidateEmail(email);
 
     // --------------------------------------------------
     // Find verified OTP
     // --------------------------------------------------
 
-    const otpRecord =
-      await Otp.findOne({
-        email:
-          normalizedEmail,
-
-        purpose:
-          "FORGOT_PASSWORD",
-
-        verified:
-          true,
-
-        consumed:
-          false,
-      }).sort({
-        createdAt:
-          -1,
-      });
-
-
-    // --------------------------------------------------
-    // OTP verification required
-    // --------------------------------------------------
+    const otpRecord = await Otp.findOne({
+      email: normalizedEmail,
+      purpose: "FORGOT_PASSWORD",
+      verified: true,
+      consumed: false,
+      expiresAt: { $gt: new Date() },
+    }).sort({
+      createdAt: -1,
+    });
 
     if (!otpRecord) {
       return res.status(400).json({
         success: false,
-
         message:
           "Please verify the password reset OTP first.",
       });
     }
-
 
     // --------------------------------------------------
     // Reset password
     // --------------------------------------------------
 
     await resetPassword({
-      email:
-        normalizedEmail,
-
+      email: normalizedEmail,
       newPassword,
     });
-
 
     // --------------------------------------------------
     // Consume OTP
     // --------------------------------------------------
 
-    otpRecord.consumed =
-      true;
+    otpRecord.consumed = true;
 
     await otpRecord.save();
 
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
       message:
         "Password reset successfully. Please login again.",
     });
-
   } catch (error) {
     next(error);
   }
 }
-
 
 // ======================================================
 // CHANGE PASSWORD
@@ -2353,32 +1858,17 @@ export async function changePasswordController(
       newPassword,
     } = req.body;
 
-
-    // --------------------------------------------------
-    // Change password
-    // --------------------------------------------------
-
     await changePassword({
-      userId:
-        req.user.id,
-
+      userId: req.user.id,
       currentPassword,
-
       newPassword,
     });
 
-
-    // --------------------------------------------------
-    // Response
-    // --------------------------------------------------
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-
       message:
         "Password changed successfully. Please login again.",
     });
-
   } catch (error) {
     next(error);
   }

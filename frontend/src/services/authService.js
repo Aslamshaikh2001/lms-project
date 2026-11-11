@@ -1,6 +1,237 @@
 
-import api from "../api/axios.js";
+// import api from "../api/axios.js";
 
+
+// // ======================================================
+// // REGISTER
+// // ======================================================
+
+// export async function registerUser({
+//   name,
+//   email,
+//   phone,
+//   address,
+//   role,
+//   password,
+// }) {
+
+//   const response = await api.post(
+//     "/auth/register",
+//     {
+//       name,
+//       email,
+//       phone,
+//       address,
+//       role,
+//       password,
+//     }
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // LOGIN
+// // ======================================================
+
+// export async function loginUser({
+//   email,
+//   password,
+// }) {
+
+//   const response = await api.post(
+//     "/auth/login",
+//     {
+//       email,
+//       password,
+//     }
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // REFRESH TOKEN
+// // ======================================================
+
+// export async function refreshToken() {
+
+//   const response = await api.post(
+//     "/auth/refresh-token"
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // LOGOUT
+// // ======================================================
+
+// export async function logoutUser() {
+
+//   const response = await api.post(
+//     "/auth/logout"
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // LOGOUT ALL DEVICES
+// // ======================================================
+
+// export async function logoutAllDevices() {
+
+//   const response = await api.post(
+//     "/auth/logout-all"
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // GET CURRENT USER
+// // ======================================================
+
+// export async function getMe() {
+
+//   const response = await api.get(
+//     "/auth/me"
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // VERIFY EMAIL OTP
+// // ======================================================
+
+// export async function verifyEmailOtp({
+//   email,
+//   otp,
+// }) {
+
+//   const response = await api.post(
+//     "/auth/verify-email-otp",
+//     {
+//       email,
+//       otp,
+//     }
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // RESEND EMAIL VERIFICATION OTP
+// // ======================================================
+
+// export async function resendVerificationOtp({
+//   email,
+// }) {
+
+//   const response = await api.post(
+//     "/auth/resend-verification-otp",
+//     {
+//       email,
+//     }
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // FORGOT PASSWORD
+// // ======================================================
+
+// export async function forgotPassword({
+//   email,
+// }) {
+
+//   const response = await api.post(
+//     "/auth/forgot-password",
+//     {
+//       email,
+//     }
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // VERIFY RESET OTP
+// // ======================================================
+
+// export async function verifyResetOtp({
+//   email,
+//   otp,
+// }) {
+
+//   const response = await api.post(
+//     "/auth/verify-reset-otp",
+//     {
+//       email,
+//       otp,
+//     }
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // RESET PASSWORD
+// // ======================================================
+
+// export async function resetPassword({
+//   email,
+//   newPassword,
+// }) {
+
+//   const response = await api.post(
+//     "/auth/reset-password",
+//     {
+//       email,
+//       newPassword,
+//     }
+//   );
+
+//   return response.data;
+// }
+
+
+// // ======================================================
+// // CHANGE PASSWORD
+// // ======================================================
+
+// export async function changePassword({
+//   currentPassword,
+//   newPassword,
+// }) {
+
+//   const response = await api.post(
+//     "/auth/change-password",
+//     {
+//       currentPassword,
+//       newPassword,
+//     }
+//   );
+
+//   return response.data;
+// }
+
+
+
+import api from "../api/axios.js";
 
 // ======================================================
 // REGISTER
@@ -12,24 +243,76 @@ export async function registerUser({
   phone,
   address,
   role,
+  studentCategory,
+  educationLevel,
+  courseName,
+  branch,
+  collegeName,
   password,
 }) {
+  const normalizedRole = String(role || "STUDENT")
+    .trim()
+    .toUpperCase();
 
-  const response = await api.post(
-    "/auth/register",
-    {
-      name,
-      email,
-      phone,
-      address,
-      role,
-      password,
+  const registrationData = {
+    name,
+    email,
+    phone,
+    address,
+    role: normalizedRole,
+    password,
+
+    // Student academic information
+    studentCategory:
+      normalizedRole === "STUDENT"
+        ? studentCategory
+        : undefined,
+
+    educationLevel:
+      normalizedRole === "STUDENT"
+        ? educationLevel
+        : undefined,
+
+    courseName:
+      normalizedRole === "STUDENT"
+        ? courseName
+        : undefined,
+
+    branch:
+      normalizedRole === "STUDENT"
+        ? branch
+        : undefined,
+
+    collegeName:
+      normalizedRole === "STUDENT"
+        ? collegeName
+        : undefined,
+  };
+
+  try {
+    const response = await api.post(
+      "/auth/register",
+      registrationData
+    );
+
+    return response.data;
+  } catch (error) {
+    // Preserve backend validation errors for Register.jsx
+    const errorData = error.response?.data;
+
+    if (errorData) {
+      throw {
+        ...error,
+        message:
+          errorData.message || "Registration failed.",
+        errors: errorData.errors || [],
+        response: error.response,
+      };
     }
-  );
 
-  return response.data;
+    throw error;
+  }
 }
-
 
 // ======================================================
 // LOGIN
@@ -39,7 +322,6 @@ export async function loginUser({
   email,
   password,
 }) {
-
   const response = await api.post(
     "/auth/login",
     {
@@ -51,13 +333,11 @@ export async function loginUser({
   return response.data;
 }
 
-
 // ======================================================
 // REFRESH TOKEN
 // ======================================================
 
 export async function refreshToken() {
-
   const response = await api.post(
     "/auth/refresh-token"
   );
@@ -65,13 +345,11 @@ export async function refreshToken() {
   return response.data;
 }
 
-
 // ======================================================
 // LOGOUT
 // ======================================================
 
 export async function logoutUser() {
-
   const response = await api.post(
     "/auth/logout"
   );
@@ -79,13 +357,11 @@ export async function logoutUser() {
   return response.data;
 }
 
-
 // ======================================================
 // LOGOUT ALL DEVICES
 // ======================================================
 
 export async function logoutAllDevices() {
-
   const response = await api.post(
     "/auth/logout-all"
   );
@@ -93,20 +369,17 @@ export async function logoutAllDevices() {
   return response.data;
 }
 
-
 // ======================================================
 // GET CURRENT USER
 // ======================================================
 
 export async function getMe() {
-
   const response = await api.get(
     "/auth/me"
   );
 
   return response.data;
 }
-
 
 // ======================================================
 // VERIFY EMAIL OTP
@@ -116,7 +389,6 @@ export async function verifyEmailOtp({
   email,
   otp,
 }) {
-
   const response = await api.post(
     "/auth/verify-email-otp",
     {
@@ -128,7 +400,6 @@ export async function verifyEmailOtp({
   return response.data;
 }
 
-
 // ======================================================
 // RESEND EMAIL VERIFICATION OTP
 // ======================================================
@@ -136,7 +407,6 @@ export async function verifyEmailOtp({
 export async function resendVerificationOtp({
   email,
 }) {
-
   const response = await api.post(
     "/auth/resend-verification-otp",
     {
@@ -147,7 +417,6 @@ export async function resendVerificationOtp({
   return response.data;
 }
 
-
 // ======================================================
 // FORGOT PASSWORD
 // ======================================================
@@ -155,7 +424,6 @@ export async function resendVerificationOtp({
 export async function forgotPassword({
   email,
 }) {
-
   const response = await api.post(
     "/auth/forgot-password",
     {
@@ -166,7 +434,6 @@ export async function forgotPassword({
   return response.data;
 }
 
-
 // ======================================================
 // VERIFY RESET OTP
 // ======================================================
@@ -175,7 +442,6 @@ export async function verifyResetOtp({
   email,
   otp,
 }) {
-
   const response = await api.post(
     "/auth/verify-reset-otp",
     {
@@ -187,7 +453,6 @@ export async function verifyResetOtp({
   return response.data;
 }
 
-
 // ======================================================
 // RESET PASSWORD
 // ======================================================
@@ -196,7 +461,6 @@ export async function resetPassword({
   email,
   newPassword,
 }) {
-
   const response = await api.post(
     "/auth/reset-password",
     {
@@ -208,7 +472,6 @@ export async function resetPassword({
   return response.data;
 }
 
-
 // ======================================================
 // CHANGE PASSWORD
 // ======================================================
@@ -217,7 +480,6 @@ export async function changePassword({
   currentPassword,
   newPassword,
 }) {
-
   const response = await api.post(
     "/auth/change-password",
     {

@@ -1,3 +1,5 @@
+
+
 // import express from "express";
 
 // import {
@@ -7,6 +9,7 @@
 
 // import {
 //   authenticate,
+//   authorizeRoles,
 // } from "../middlewares/authMiddleware.js";
 
 // const router = express.Router();
@@ -17,6 +20,18 @@
 // // ======================================================
 
 // router.use(authenticate);
+
+
+// // ======================================================
+// // ADMIN / SUPER ADMIN AUTHORIZATION
+// // ======================================================
+
+// router.use(
+//   authorizeRoles(
+//     "ADMIN",
+//     "SUPER_ADMIN"
+//   )
+// );
 
 
 // // ======================================================
@@ -38,15 +53,13 @@
 
 
 
-
-
-
-
 import express from "express";
 
 import {
   getStudents,
   getStudent,
+  deleteStudent,
+  deleteAllStudents,
 } from "../controllers/adminStudentController.js";
 
 import {
@@ -56,13 +69,11 @@ import {
 
 const router = express.Router();
 
-
 // ======================================================
 // AUTHENTICATION
 // ======================================================
 
 router.use(authenticate);
-
 
 // ======================================================
 // ADMIN / SUPER ADMIN AUTHORIZATION
@@ -75,9 +86,18 @@ router.use(
   )
 );
 
-
 // ======================================================
-// STUDENTS
+// GET STUDENTS
+// Supports:
+// - Pagination
+// - Search
+// - Status filter
+// - IT / NON-IT filter
+// - Education level filter
+// - Course-wise filter
+// - Specialization / Branch-wise filter
+// - College-wise filter
+// - Student counts and category counts
 // ======================================================
 
 router.get(
@@ -85,10 +105,31 @@ router.get(
   getStudents
 );
 
+// ======================================================
+// GET SINGLE STUDENT
+// ======================================================
+
 router.get(
   "/students/:studentId",
   getStudent
 );
 
+// ======================================================
+// DELETE ALL STUDENTS
+// ======================================================
+
+router.delete(
+  "/students/all",
+  deleteAllStudents
+);
+
+// ======================================================
+// DELETE SINGLE STUDENT
+// ======================================================
+
+router.delete(
+  "/students/:studentId",
+  deleteStudent
+);
 
 export default router;

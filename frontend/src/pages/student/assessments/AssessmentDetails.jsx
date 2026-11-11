@@ -981,7 +981,7 @@ export default function AssessmentDetails() {
             iconColor="text-warning-emphasis"
           />
         </div>
-        <div className="col-12 col-sm-6 col-xl-3">
+        {/* <div className="col-12 col-sm-6 col-xl-3">
           <InfoCard
             icon="bi-check-circle"
             label="Passing Marks"
@@ -989,7 +989,7 @@ export default function AssessmentDetails() {
             badgeColor="bg-success-subtle"
             iconColor="text-success"
           />
-        </div>
+        </div> */}
       </motion.div>
 
       {/* ==================================================

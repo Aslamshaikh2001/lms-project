@@ -266,14 +266,14 @@ export default function Assessments() {
                               </strong>
                             </div>
 
-                            <div className="col-6">
+                            {/* <div className="col-6">
                               <span className="text-muted d-block small">
                                 Passing Marks
                               </span>
                               <strong className="text-dark small">
                                 {assessment.passingMarks || 0}
                               </strong>
-                            </div>
+                            </div> */}
 
                             <div className="col-6">
                               <span className="text-muted d-block small">
